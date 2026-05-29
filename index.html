@@ -86,7 +86,7 @@
   .task-title{font-size:14px;font-weight:500;line-height:1.4;text-align:right;}
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
   
-  /* תגיות קטגוריה בעיצוב המקורי לחלוטין - אליפסה קטנה ונקייה */
+  /* תגיות קטגוריה בעיצוב המקורי לחלוטין - אליפסה קטנה, נקייה ומושלמת */
   .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;background:#fff;}
   
   .duration-tag {font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
@@ -242,6 +242,12 @@ if(!localStorage.getItem('mish_cats')) { localStorage.setItem('mish_cats', JSON.
 let tasks=JSON.parse(localStorage.getItem('mish_tasks')||'[]');
 let schedule=JSON.parse(localStorage.getItem('mish_sched_multi')||'{"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]}');
 
+// מנגנון ניקוי והגנה ראשוני - מונע קריסות בשל מפתחות פגומים בזיכרון הישן
+if (typeof schedule !== 'object' || Array.isArray(schedule)) {
+  schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
+}
+DAYS.forEach(d => { if(!Array.isArray(schedule[d.key])) schedule[d.key] = []; });
+
 let filter='all';
 let editId=null;
 let editCatId=null;
@@ -269,7 +275,7 @@ function save(){
   localStorage.setItem('mish_tasks',JSON.stringify(tasks));
   localStorage.setItem('mish_sched_multi',JSON.stringify(schedule));
 }
-function getCat(id){return cats.find(c=>c.id===id)||{name:'?',color:'#f3f4f6',text:'#374151',border:'#d1d5db'};}
+function getCat(id){return cats.find(c=>c.id===id)||{name:'📊',color:'#f3f4f6',text:#374151,border:'#d1d5db'};}
 function uid(){return Math.random().toString(36).slice(2,10);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function getTask(id){return tasks.find(t=>t.id===id)||null;}
@@ -297,12 +303,13 @@ function autoAssignTasksByDate() {
   const wDates = getWeekDates();
   let changed = false;
   tasks.forEach(t => {
-    if(t.due && !t.done) {
+    if(t && t.due && !t.done) {
       DAYS.forEach(d => {
         const isoDate = wDates[d.key+'_iso'];
         if(t.due === isoDate) {
           if(!schedule[d.key].includes(t.id)) {
-            DAYS.forEach(day => { schedule[day] = schedule[day].filter(id => id !== t.id); });
+            DAYS.forEach(day => { schedule[day] = (schedule[day]||[]).filter(id => id !== t.id); });
+            if(!schedule[d.key]) schedule[d.key] = [];
             schedule[d.key].push(t.id);
             changed = true;
           }
@@ -453,22 +460,24 @@ function renderWeek(){
 }
 
 function removeFromDay(dayKey, taskId){
-  schedule[dayKey] = (schedule[dayKey] || []).filter(id => id !== taskId);
-  save(); renderWeek();
+  if(schedule[dayKey]) {
+    schedule[dayKey] = schedule[dayKey].filter(id => id !== taskId);
+    save(); renderWeek();
+  }
 }
 
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
   weekdayKeys.forEach(k => { schedule[k] = []; });
   
-  const freeTasks = tasks.filter(t => !t.done);
+  const freeTasks = tasks.filter(t => t && !t.done);
 
   if(!freeTasks.length) {
     alert('אין משימות פנויות בבנק לשיבוץ אוטומטי! 📋');
     closeModal(); return;
   }
 
-  // חלוקת משימות לפי קבוצות: דחופות, מהירות (משימה קטנה) ורגילות (משימה גדולה)
+  // סינון ופיצול משימות בהתאם לכללים הקבועים
   let urgent = freeTasks.filter(t => t.prio === 'high');
   let nonUrgent = freeTasks.filter(t => t.prio !== 'high');
   
@@ -478,13 +487,13 @@ function generateScheduleWithLevel(maxPerDay) {
   weekdayKeys.forEach(k => {
     let slotsAvailable = maxPerDay;
 
-    // שלב 1: שיבוץ משימות דחופות קודם כל
+    // חוק 1: משימות דחופות נכנסות קודם כל ללו"ז
     while (slotsAvailable > 0 && urgent.length > 0) {
       schedule[k].push(urgent.shift().id);
       slotsAvailable--;
     }
 
-    // שלב 2: שילוב חובה של תמיד משימה קטנה ומשימה גדולה (אם יש מקום פנוי ביום)
+    // חוק 2: שילוב תמיד של לפחות משימה אחת קטנה ואחת גדולה (במידה ויש מקום ומשימות מתאימות)
     if (slotsAvailable >= 2) {
       if (shortTasks.length > 0 && longTasks.length > 0) {
         schedule[k].push(shortTasks.shift().id);
@@ -493,7 +502,7 @@ function generateScheduleWithLevel(maxPerDay) {
       }
     }
 
-    // שלב 3: מילוי שאר המקומות הפנויים ביום בצורה מאוזנת
+    // חוק 3: מילוי שאר המקומות הפנויים בצורה מאוזנת וסדירה
     while (slotsAvailable > 0 && (shortTasks.length > 0 || longTasks.length > 0)) {
       if (shortTasks.length > 0) {
         schedule[k].push(shortTasks.shift().id);
@@ -540,7 +549,8 @@ function renderPills(){
 function renderTasks(){
   const el=document.getElementById('taskList');
   if(!el) return;
-  let list = filter==='done' ? tasks.filter(t=>t.done) : (filter==='all' ? tasks.filter(t=>!t.done) : tasks.filter(t=>t.cat===filter&&!t.done));
+  // הגנה קריטית: סינון משימות פגומות שאין להן קטגוריה או הגדרה
+  let list = filter==='done' ? tasks.filter(t=>t&&t.done) : (filter==='all' ? tasks.filter(t=>t&&!t.done) : tasks.filter(t=>t&&t.cat===filter&&!t.done));
   list = [...list].sort((a,b)=> (a.prio==='high'?0:1) - (b.prio==='high'?0:1));
   
   if(!list.length){
@@ -578,7 +588,8 @@ function renderTasks(){
 }
 
 function renderProgress(){
-  const total=tasks.length, done=tasks.filter(t=>t.done).length;
+  const validTasks = tasks.filter(Boolean);
+  const total=validTasks.length, done=validTasks.filter(t=>t.done).length;
   const bar = document.getElementById('progressBar');
   if (bar) bar.style.width=(total?Math.round((done/total)*100):0)+'%';
   const label = document.getElementById('progressLabel');
@@ -588,7 +599,7 @@ function renderProgress(){
 function renderCatSidebar(){
   const el=document.getElementById('catSidebar');
   if(!el) return;
-  const counts={}; tasks.forEach(t=>{ if(!t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
+  const counts={}; tasks.forEach(t=>{ if(t && !t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
   
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
     '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '">' +
@@ -617,7 +628,7 @@ function toggleTask(id){
   if(t){ t.done=!t.done; save(); render(); }
 }
 function deleteTask(id){
-  tasks=tasks.filter(t=>t.id!==id);
+  tasks=tasks.filter(t=>t && t.id!==id);
   DAYS.forEach(d=>{ if(schedule[d.key]) schedule[d.key]=schedule[d.key].filter(i=>i!==id); });
   save(); render();
 }
@@ -676,7 +687,7 @@ function openModal(type,id){
       '</div></div>';
   }
   else if(type==='addDay'){
-    const free=tasks.filter(t=>!t.done);
+    const free=tasks.filter(t=>t && !t.done);
     const opts=free.length?free.map(t=>{const c=getCat(t.cat); return '<option value="' + t.id + '">[' + c.name + '] ' + esc(t.title) + '</option>';}).join(''):'<option value="">-- אין משימות פנויות --</option>';
     const dayObj = DAYS.find(d=>d.key===id);
     
