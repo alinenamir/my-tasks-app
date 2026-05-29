@@ -86,7 +86,6 @@
   .task-title{font-size:14px;font-weight:500;line-height:1.4;text-align:right;}
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
   
-  /* עיצוב משופר עם עיגול צבעוני מסביב לקטגוריות בבנק המשימות */
   .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;gap:5px;background:#fff;}
   .badge-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
   
@@ -227,7 +226,7 @@ const DC=[
   {id:'exp',name:'חוויות',color:'#fce7f3',text:'#9d174d',border:'#f9a8d4'},
   {id:'study',name:'לימודים ועתיד',color:'#dcfce7',text:'#166534',border:'#86efac'},
   {id:'health',name:'בריאות ואישי',color:'#ffedd5',text:'#9a3412',border:'#fdba74'},
-  {idwork',name:'עבודה',color:'#e0f2fe',text:'#075985',border:'#7dd3fc'},
+  {id:'work',name:'עבודה',color:'#e0f2fe',text:'#075985',border:'#7dd3fc'},
   {id:'money',name:'כספים',color:'#fef9c3',text:'#854d0e',border:'#fde047'},
   {id:'social',name:'קשרים חברתיים',color:'#dbeafe',text:'#1e40af',border:'#93c5fd'}
 ];
@@ -311,6 +310,7 @@ function autoAssignTasksByDate() {
 
 function updatePersistentLockBanner() {
   const banner = document.getElementById('persistentBanner');
+  if (!banner) return;
   const todayKey = getTodayKey();
   if (todayKey === 'sat') {
     document.getElementById('bannerText').innerHTML = '📌 <strong>משימה לשבת:</strong> להכין לוז משימות ולוז חוויות ✨';
@@ -392,48 +392,58 @@ function renderWeek(){
     totalDone += tList.filter(t => t.done).length;
   });
 
-  document.getElementById('weekLabel').textContent = totalFilled ? totalDone + ' מתוך ' + totalFilled + ' משימות שבועיות הושלמו' : 'הלו"ז ריק. לחצי לייצור אוטומטי או הוסיפי ידנית';
-  document.getElementById('dayHeaders').innerHTML=DAYS.map(d=> '<div class="day-header' + (d.weekend?' weekend':'') + '">' + d.label + '<span>' + wDates[d.key] + '</span></div>' ).join('');
+  const weekLabelEl = document.getElementById('weekLabel');
+  if(weekLabelEl) {
+    weekLabelEl.textContent = totalFilled ? totalDone + ' מתוך ' + totalFilled + ' משימות שבועיות הושלמו' : 'הלו"ז ריק. לחצי לייצור אוטומטי או הוסיפי ידנית';
+  }
   
-  document.getElementById('daySlots').innerHTML=DAYS.map(d=>{
-    const tIds = schedule[d.key] || [];
-    let cardsHtml = '';
-    
-    tIds.forEach(tId => {
-      const t = getTask(tId);
-      if(!t) return;
-      const c = getCat(t.cat);
-      const isShort = t.duration === 'short';
-      const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+  const headersEl = document.getElementById('dayHeaders');
+  if(headersEl) {
+    headersEl.innerHTML=DAYS.map(d=> '<div class="day-header' + (d.weekend?' weekend':'') + '">' + d.label + '<span>' + wDates[d.key] + '</span></div>' ).join('');
+  }
+  
+  const slotsEl = document.getElementById('daySlots');
+  if(slotsEl) {
+    slotsEl.innerHTML=DAYS.map(d=>{
+      const tIds = schedule[d.key] || [];
+      let cardsHtml = '';
       
-      cardsHtml += '<div class="sched-card ' + (t.done ? 'done' : '') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
-          '<div style="display:flex;align-items:flex-start;gap:5px;">' +
-            '<div class="task-check ' + (t.done ? 'checked' : '') + '" style="width:15px;height:15px;margin-top:2px;" onclick="toggleTask(\'' + t.id + '\')">' +
-              '<span class="chk-mark" style="color:' + c.text + ';font-size:8px;">✓</span>' +
+      tIds.forEach(tId => {
+        const t = getTask(tId);
+        if(!t) return;
+        const c = getCat(t.cat);
+        const isShort = t.duration === 'short';
+        const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+        
+        cardsHtml += '<div class="sched-card ' + (t.done ? 'done' : '') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
+            '<div style="display:flex;align-items:flex-start;gap:5px;">' +
+              '<div class="task-check ' + (t.done ? 'checked' : '') + '" style="width:15px;height:15px;margin-top:2px;" onclick="toggleTask(\'' + t.id + '\')">' +
+                '<span class="chk-mark" style="color:' + c.text + ';font-size:8px;">✓</span>' +
+              '</div>' +
+              '<div class="sched-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
             '</div>' +
-            '<div class="sched-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
-          '</div>' +
-          '<div class="sched-meta">' +
-            '<span style="font-size:9px;color:' + c.text + ';font-weight:700;">' + c.name + '</span>' +
-            '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '" style="font-size:8px;padding:0 4px;">' + timeTagText + '</span>' +
-          '</div>' +
-          '<div class="sched-actions">' +
-            '<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal(\'edit\',\'' + t.id + '\')">' +
-              '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>' +
-            '</button>' +
-            '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay(\'' + d.key + '\',\'' + t.id + '\')">' +
-              '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-            '</button>' +
-          '</div>' +
-        '</div>';
-    });
+            '<div class="sched-meta">' +
+              '<span style="font-size:9px;color:' + c.text + ';font-weight:700;">' + c.name + '</span>' +
+              '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '" style="font-size:8px;padding:0 4px;">' + timeTagText + '</span>' +
+            '</div>' +
+            '<div class="sched-actions">' +
+              '<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal(\'edit\',\'' + t.id + '\')">' +
+                '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>' +
+              '</button>' +
+              '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay(\'' + d.key + '\',\'' + t.id + '\')">' +
+                '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+      });
 
-    return '<div class="day-slot ' + (d.weekend ? 'weekend-slot' : '') + '" id="slot_' + d.key + '" data-dayname="' + d.full + '" data-daydate="' + wDates[d.key] + '" ' +
-        'ondragover="dragOver(event,\'' + d.key + '\')" ondragleave="dragLeave(event,\'' + d.key + '\')" ondrop="dropOnDay(event,\'' + d.key + '\')">' +
-        '<div class="day-slot-tasks">' + cardsHtml + '</div>' +
-        '<div class="day-slot-add" onclick="openModal(\'addDay\',\'' + d.key + '\')">+</div>' +
-      '</div>';
-  }).join('');
+      return '<div class="day-slot ' + (d.weekend ? 'weekend-slot' : '') + '" id="slot_' + d.key + '" data-dayname="' + d.full + '" data-daydate="' + wDates[d.key] + '" ' +
+          'ondragover="dragOver(event,\'' + d.key + '\')" ondragleave="dragLeave(event,\'' + d.key + '\')" ondrop="dropOnDay(event,\'' + d.key + '\')">' +
+          '<div class="day-slot-tasks">' + cardsHtml + '</div>' +
+          '<div class="day-slot-add" onclick="openModal(\'addDay\',\'' + d.key + '\')">+</div>' +
+        '</div>';
+    }).join('');
+  }
   updatePersistentLockBanner();
 }
 
@@ -444,8 +454,6 @@ function removeFromDay(dayKey, taskId){
 
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
-  
-  // איפוס השיבוצים הישנים בימי החול כדי לאפשר חלוקה מחדש מלאה ונכונה
   weekdayKeys.forEach(k => { schedule[k] = []; });
   
   const freeTasks = tasks.filter(t => !t.done);
@@ -501,6 +509,7 @@ function dropOnDay(e,k){
 
 function renderPills(){
   const el=document.getElementById('catPills');
+  if(!el) return;
   let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')">הכל</span>';
   cats.forEach(c=>{ 
     const isActive = filter === c.id;
@@ -513,6 +522,7 @@ function renderPills(){
 
 function renderTasks(){
   const el=document.getElementById('taskList');
+  if(!el) return;
   let list = filter==='done' ? tasks.filter(t=>t.done) : (filter==='all' ? tasks.filter(t=>!t.done) : tasks.filter(t=>t.cat===filter&&!t.done));
   list = [...list].sort((a,b)=> (a.prio==='high'?0:1) - (b.prio==='high'?0:1));
   
@@ -525,6 +535,7 @@ function renderTasks(){
     const c=getCat(t.cat);
     const isShort = t.duration === 'short';
     const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+    const dateStr = t.due ? t.due.split('-').reverse().join('/') : '';
     
     return '<div class="task-card fade-in ' + (t.done ? 'done' : '') + '" style="border-color:' + c.border + '; background:linear-gradient(135deg, #fff, ' + c.color + '22)" ' +
       'draggable="true" ondragstart="event.dataTransfer.setData(\'taskId\',\'' + t.id + '\')">' +
@@ -540,7 +551,7 @@ function renderTasks(){
           '</span>' +
           '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
           (t.prio === 'high' ? '<span class="prio-tag prio-high">🔥 גבוהה</span>' : '') +
-          (t.due ? '<span style="font-size:10px;color:#9ca3af;">📅 ' + t.due.split('-').reverse().join('/') + '</span>' : '') +
+          (t.due ? '<span style="font-size:10px;color:#9ca3af;">📅 ' + dateStr + '</span>' : '') +
         '</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
@@ -553,12 +564,15 @@ function renderTasks(){
 
 function renderProgress(){
   const total=tasks.length, done=tasks.filter(t=>t.done).length;
-  document.getElementById('progressBar').style.width=(total?Math.round((done/total)*100):0)+'%';
-  document.getElementById('progressLabel').textContent=total? done + ' מתוך ' + total + ' משימות בבנק הושלמו' : '';
+  const bar = document.getElementById('progressBar');
+  if (bar) bar.style.width=(total?Math.round((done/total)*100):0)+'%';
+  const label = document.getElementById('progressLabel');
+  if (label) label.textContent=total? done + ' מתוך ' + total + ' משימות בבנק הושלמו' : '';
 }
 
 function renderCatSidebar(){
   const el=document.getElementById('catSidebar');
+  if(!el) return;
   const counts={}; tasks.forEach(t=>{ if(!t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
   
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
@@ -595,6 +609,7 @@ function deleteTask(id){
 
 function openModal(type,id){
   const mc=document.getElementById('modalContainer');
+  if(!mc) return;
 
   if(type==='add'||type==='edit'){
     const t=id?getTask(id):null; editId=id||null;
@@ -625,7 +640,7 @@ function openModal(type,id){
           '<textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">' + (t&&t.note?esc(t.note):'') + '</textarea></div>' +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          '<button class="btn-primary" onclick="saveTask()">' + (t?'שמור':'הוסף לבנק') + '</button>' +
+          '<button class="btn-primary" onclick="saveTask()">שמור</button>' +
         '</div>' +
       '</div></div>';
   } 
@@ -638,7 +653,7 @@ function openModal(type,id){
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
           '<div class="opt-title">מתקדם - עד 3 משימות ביום</div>' +
-        }
+        '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
           '<div class="opt-title">שגרה מלאה - עד 5 משימות ביום</div>' +
         '</div>' +
@@ -682,7 +697,12 @@ function openModal(type,id){
   }
 }
 
-function closeModal(){document.getElementById('modalContainer').innerHTML=''; editId=null; editCatId=null;}
+function closeModal(){
+  const mc = document.getElementById('modalContainer');
+  if(mc) mc.innerHTML=''; 
+  editId=null; 
+  editCatId=null;
+}
 function closeBg(e){if(e.target.classList.contains('modal-overlay'))closeModal();}
 
 function assignToDay(k){
