@@ -30,7 +30,32 @@ h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,
 
 .main-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
 .right-col{display:flex;flex-direction:column;gap:20px;}
-@media(max-width:900px){.main-layout{grid-template-columns:1fr;}}
+
+/* DESKTOP WEEKLY GRID */
+.week-header-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:4px;}
+.day-col{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.day-header{text-align:center;font-size:11px;font-weight:600;color:#6b7280;padding:4px 2px;}
+.day-header.weekend{color:#a78bfa;}
+
+/* RESPONSIVE DESIGN FOR MOBILE BREAKPOINT */
+@media(max-width:900px){
+  .main-layout{grid-template-columns:1fr;}
+  /* Change 7 columns grid to a vertical stack for mobile comfort */
+  .week-header-row {display:none;} /* Hide the tiny horizontal headers */
+  .day-col {grid-template-columns: 1fr; gap: 10px;}
+  .day-slot {min-height: 75px; padding: 12px; align-items: flex-start; justify-content: flex-start; border-style: solid; background: #fff;}
+  /* Prepend the day name dynamically on mobile view */
+  .day-slot::before {
+    content: "יום " attr(data-dayname) ":";
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .day-slot.weekend-slot::before { color: #a78bfa; }
+}
+
 .panel{background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;}
 .panel-header{padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 .panel-title{font-size:16px;font-weight:600;}
@@ -83,10 +108,6 @@ h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,
 .cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .cat-name{font-size:12px;font-weight:500;flex:1;}
 .cat-count{font-size:11px;}
-.week-header-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:4px;}
-.day-col{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.day-header{text-align:center;font-size:11px;font-weight:600;color:#6b7280;padding:4px 2px;}
-.day-header.weekend{color:#a78bfa;}
 .day-slot{border-radius:12px;border:1.5px dashed #e5e7eb;background:#fafafa;min-height:90px;padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;position:relative;}
 .day-slot.has-task{border-style:solid;justify-content:flex-start;background:#fff;}
 .day-slot.weekend-slot{background:#fdf8ff;border-color:#e9d5ff;}
@@ -237,7 +258,7 @@ function getTask(id){return tasks.find(t=>t.id===id)||null;}
 
 // ── PHASE 3: NOTIFICATION & LOCK SYSTEM ENGINE ────────────────
 function getTodayKey() {
-  const dayIndex = new Date().getDay(); // 0 = Sunday, 1 = Monday... 6 = Saturday
+  const dayIndex = new Date().getDay();
   const map = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   return map[dayIndex];
 }
@@ -258,7 +279,7 @@ function updatePersistentLockBanner() {
 
 function requestNotificationPermission() {
   if (!('Notification' in window)) {
-    alert('הדפדפן במכשיר זה אינו תומך בהתראות מערכת.');
+    alert('אנא שימי לב: באייפון (iOS), כדי להפעיל התראות, עלייך קודם כל ללחוץ על כפתור השיתוף בספארי, לבחור "הוסף למסך הבית", ולפתוח את האפליקציה משם!');
     return;
   }
   Notification.requestPermission().then(permission => {
@@ -300,20 +321,17 @@ function focusTodayTask() {
   }
 }
 
-// Triggered every morning or manually via test button
 function runDailyCheck(isTest = false) {
   const todayKey = getTodayKey();
   const todayTask = schedule[todayKey] ? getTask(schedule[todayKey]) : null;
   const currentDayIndex = new Date().getDay();
 
-  // Saturday Report trigger (Day Index 6 = Saturday)
   if (currentDayIndex === 6 || (isTest && todayKey === 'sat')) {
     openModal('saturdayReport');
     sendSystemNotification('📊 זמן לדו"ח המשימות השבועי', 'לחצי כדי לראות מה השלמת השבוע ומה נשאר בבנק המשימות.');
     return;
   }
 
-  // Regular Daily Notification Trigger
   if (todayTask) {
     if (!todayTask.done) {
       sendSystemNotification(`📌 משימה מחכה לך היום (${DAYS.find(d=>d.key===todayKey).full})`, `${todayTask.title}`);
@@ -324,10 +342,8 @@ function runDailyCheck(isTest = false) {
 }
 
 function triggerTestNotification() {
-  // Check if there is a task for today to make the test realistic
   const todayKey = getTodayKey();
   if(!schedule[todayKey]) {
-    // Inject a dummy task if completely empty for test visual representation
     const dummy = tasks[0] || { id: 'dummy', title: 'להתחיל לעוף על המטרות שלי' };
     schedule[todayKey] = dummy.id;
     if(tasks.length === 0) tasks.push({id: dummy.id, title: dummy.title, cat: 'exp', done: false});
@@ -336,10 +352,9 @@ function triggerTestNotification() {
   }
   
   if ('Notification' in window && Notification.permission !== 'granted') {
-    alert('אנא אשרי תחילה קבלת התראות על ידי לחיצה על כפתור "הפעל התראות בנייד". לאחר מכן בדיקת הטסט תעבוד בצורה מלאה.');
+    alert('אנא אשרי תחילה קבלת התראות דרך גרסת "מסך הבית" באייפון.');
   }
   
-  // Force simulate system notification and banner check
   runDailyCheck(true);
   updatePersistentLockBanner();
 }
@@ -355,17 +370,17 @@ function renderWeek(){
     const t=tId?getTask(tId):null;
     if(!t){
       if(d.weekend){
-        return `<div class="day-slot weekend-slot" id="slot_${d.key}"
+        return `<div class="day-slot weekend-slot" id="slot_${d.key}" data-dayname="${d.full}"
           ondragover="dragOver(event,'${d.key}')" ondragleave="dragLeave(event,'${d.key}')" ondrop="dropOnDay(event,'${d.key}')"
           onclick="openModal('addDay','${d.key}')">
           <div class="day-add-btn">+</div>
           <div class="day-empty-label">הוסף ידנית</div>
         </div>`;
       }
-      return `<div class="day-slot" id="slot_${d.key}"><div style="font-size:20px;opacity:.15;">—</div></div>`;
+      return `<div class="day-slot" id="slot_${d.key}" data-dayname="${d.full}"><div style="font-size:20px;opacity:.15;">—</div></div>`;
     }
     const c=getCat(t.cat);
-    return `<div class="day-slot has-task${d.weekend?' weekend-slot':''}" id="slot_${d.key}">
+    return `<div class="day-slot has-task${d.weekend?' weekend-slot':''}" id="slot_${d.key}" data-dayname="${d.full}">
       <div class="sched-card${t.done?' done':''}" style="background:${c.color};border-color:${c.border}">
         <div class="sched-top-row">
           <div class="sched-check${t.done?' checked':''}" onclick="toggleTask('${t.id}',true)">
@@ -441,10 +456,10 @@ function showNote(html,bg,color){
 }
 
 // ── DRAG & DROP ──────────────────────────────────────────────
-function dragOver(e,k){e.preventDefault();document.getElementById('slot_'+k).classList.add('drag-over');}
-function dragLeave(e,k){document.getElementById('slot_'+k).classList.remove('drag-over');}
+function dragOver(e,k){e.preventDefault();const s=document.getElementById('slot_'+k); if(s) s.classList.add('drag-over');}
+function dragLeave(e,k){const s=document.getElementById('slot_'+k); if(s) s.classList.remove('drag-over');}
 function dropOnDay(e,k){
-  e.preventDefault();document.getElementById('slot_'+k).classList.remove('drag-over');
+  e.preventDefault();const s=document.getElementById('slot_'+k); if(s) s.classList.remove('drag-over');
   const tId=e.dataTransfer.getData('taskId');
   if(tId){schedule[k]=tId;save();renderWeek();}
 }
@@ -643,14 +658,13 @@ function openModal(type,id){
         </div>
       </div></div>`;
   } else if(type==='saturdayReport'){
-    // PHASE 3: SATURDAY WEEKLY SUMMARY REPORT MODAL
     const weekDone = DAYS.filter(d=>schedule[d.key]&&getTask(schedule[d.key])?.done).length;
     const weekTotal = DAYS.filter(d=>schedule[d.key]&&getTask(schedule[d.key])).length;
     const bankRemaining = tasks.filter(t=>!t.done).length;
 
     mc.innerHTML=`<div class="modal-overlay" onclick="closeBg(event)">
       <div class="modal fade-in">
-        <div class="modal-title">📊 זוג של השראה — דוח שבועי</div>
+        <div class="modal-title">📊 דוח שבועי — משימות ✦</div>
         <p style="font-size:13px;color:#4b5563;line-height:1.5;">יום שבת הגיע! הנה סיכום ההספק השבועי שלך והמצב הנוכחי של בנק המשימות:</p>
         <div class="report-card">
           <div class="report-stat">
@@ -733,8 +747,6 @@ function updateCat(){
 // ── INIT RUN ─────────────────────────────────────────────────
 render();
 updateNotiButtonUI();
-// Run instant check for lock rules upon opening app
 setTimeout(updatePersistentLockBanner, 500);
-// Run background automated checks every 1 hour
 setInterval(updatePersistentLockBanner, 3600000);
 </script>
