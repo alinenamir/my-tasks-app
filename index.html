@@ -73,10 +73,11 @@
   .btn-icon.danger:hover{background:#fee2e2;color:#dc2626;}
   
   .pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
-  .pill{border:1.5px solid transparent;border-radius:100px;padding:4px 12px;font-size:13px;font-weight:500;cursor:pointer;}
+  .pill{border:1.5px solid transparent;border-radius:100px;padding:4px 12px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
   .pill.active{border-color:currentColor;background:rgba(0,0,0,0.03);}
   .pill-all.active{background:#111827;color:#fff;}
   .pill-done.active{background:#6b7280;color:#fff;}
+  .pill-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
   
   .prog-wrap{height:4px;background:#f3f4f6;border-radius:100px;margin-bottom:16px;overflow:hidden;}
   .prog-bar{height:100%;background:#a78bfa;transition:width .4s;}
@@ -91,9 +92,10 @@
   .chk-mark{display:none;font-size:10px;}
   .task-check.checked .chk-mark{display:block;}
   .task-content{flex:1;min-width:0;}
-  .task-title{font-size:14px;font-weight:500;line-height:1.4;}
+  .task-title{font-size:14px;font-weight:500;line-height:1.4;text-align:right;}
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
-  .cat-badge{font-size:11px;font-weight:500;padding:1px 7px;border-radius:100px;border:1px solid rgba(0,0,0,0.09);}
+  .cat-badge{font-size:11px;font-weight:500;padding:1px 7px;border-radius:100px;border:1px solid rgba(0,0,0,0.09);display:inline-flex;align-items:center;gap:4px;}
+  .badge-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
   
   .duration-tag {font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .dur-short {background:#e0f2fe;color:#0369a1;}
@@ -101,41 +103,40 @@
 
   .prio-tag{font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .prio-high{background:#fee2e2;color:#dc2626;}
-  .task-note{font-size:11px;color:#6b7280;margin-top:3px;}
+  .task-note{font-size:11px;color:#6b7280;margin-top:3px;text-align:right;}
 
   .day-slot{border-radius:12px;border:1.5px dashed #e5e7eb;background:#fafafa;min-height:110px;padding:6px;display:flex;flex-direction:column;gap:6px;transition:all .2s;}
   .day-slot.weekend-slot{background:#fdf8ff;border-color:#e9d5ff;}
   .day-slot.drag-over{background:#f0f9ff;border-color:#7dd3fc;border-style:solid;}
-  .day-slot-tasks {display:flex;flex-direction:column;gap:5px;width:100%;flex:1;}
+  .day-slot-tasks {display:flex;flex-direction:column;gap:6px;width:100%;flex:1;}
   .day-slot-add {text-align:center;font-size:18px;color:#c4b5fd;cursor:pointer;padding:2px 0;border-radius:6px;}
   .day-slot-add:hover {background:rgba(0,0,0,0.03);color:#7c3aed;}
 
-  .sched-card{border-radius:8px;padding:6px 8px;border:1.5px solid transparent;display:flex;flex-direction:column;gap:2px;position:relative;}
+  .sched-card{border-radius:8px;padding:8px;border:1.5px solid transparent;display:flex;flex-direction:column;gap:4px;position:relative;width:100%;box-shadow:0 1px 3px rgba(0,0,0,0.02);}
   .sched-card.done .sched-title{text-decoration:line-through;opacity:.45;}
-  .sched-title{font-size:12.5px;font-weight:600;line-height:1.3;}
-  .sched-meta {display:flex;justify-content:space-between;align-items:center;margin-top:3px;}
-  .sched-actions{display:flex;gap:2px;opacity:0;position:absolute;top:2px;left:2px;background:inherit;padding-left:2px;border-radius:4px;}
+  .sched-title{font-size:12.5px;font-weight:600;line-height:1.3;text-align:right;padding-left:35px;}
+  .sched-meta {display:flex;justify-content:space-between;align-items:center;margin-top:2px;}
+  .sched-actions{display:flex;gap:2px;opacity:0;position:absolute;top:4px;left:4px;background:inherit;padding-left:2px;border-radius:4px;transition:opacity 0.15s;}
   .sched-card:hover .sched-actions{opacity:1;}
 
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
-  .modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
-  .modal-title{font-size:17px;font-weight:600;margin-bottom:16px;}
-  .form-group{margin-bottom:12px;}
+  .modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);direction:rtl;}
+  .modal-title{font-size:17px;font-weight:600;margin-bottom:16px;text-align:right;}
+  .form-group{margin-bottom:12px;text-align:right;}
   .form-label{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:4px;display:block;}
-  .form-input{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Heebo',sans-serif;background:#fff;}
+  .form-input{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Heebo',sans-serif;background:#fff;text-align:right;}
   .form-textarea{resize:vertical;min-height:60px;}
   .form-row{display:flex;gap:10px;}
   .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
   
-  .opt-box {border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all .15s;}
+  .opt-box {border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all .15s;text-align:right;}
   .opt-box:hover {border-color:#a78bfa;background:#fdf8ff;}
   .opt-title {font-weight:700;font-size:14px;color:#111827;margin-bottom:2px;}
-  .opt-desc {font-size:12px;color:#6b7280;}
 
   .cat-list{display:flex;flex-direction:column;gap:6px;}
   .cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.05);cursor:pointer;}
-  .cat-dot{width:8px;height:8px;border-radius:50%;}
-  .cat-name{font-size:12px;font-weight:500;flex:1;}
+  .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .cat-name{font-size:12px;font-weight:500;flex:1;text-align:right;}
   .cat-count{font-size:11px;}
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -163,11 +164,10 @@
   </div>
 
   <div class="main-layout">
-    <!-- שמאל: הלו"ז השבועי -->
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">הלוז השבועי</div>
+          <div class="panel-title">הלוז השבועי הימני</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;" id="weekLabel"></div>
         </div>
         <button class="btn-auto" onclick="openModal('chooseLevel')">
@@ -181,7 +181,6 @@
       </div>
     </div>
     
-    <!-- ימין: בנק המשימות וקטגוריות -->
     <div class="right-col">
       <div class="panel">
         <div class="panel-header">
@@ -333,7 +332,7 @@ function updatePersistentLockBanner() {
   const activeTodayTasks = todayTaskIds.map(getTask).filter(t => t && !t.done);
 
   if (activeTodayTasks.length > 0) {
-    const titles = activeTodayTasks.map(t => '"' + t.title + '"').join(', ');
+    const titles = activeTodayTasks.map(t => t.title).join(', ');
     document.getElementById('bannerText').innerHTML = '⚠️ <strong>ממתין ל-V היום:</strong> ' + esc(titles);
     banner.style.display = 'flex';
   } else {
@@ -343,7 +342,7 @@ function updatePersistentLockBanner() {
 
 function requestNotificationPermission() {
   if (!('Notification' in window)) {
-    alert('באייפון (iOS), יש ללחוץ על כפתור השיתוף בספארי, לבחור "הוסף למסך הבית", ולפתוח משם כדי לאפשר התראות.');
+    alert('באייפון יש ללחוץ על כפתור השיתוף בספארי, לבחור הוסף למסך הבית, ולפתוח משם כדי לאפשר התראות.');
     return;
   }
   Notification.requestPermission().then(permission => {
@@ -388,7 +387,7 @@ function checkAlarmClock() {
     if (todayTasks.length > 0) {
       const first = todayTasks[0];
       const details = first.note ? '\n📝 פרטים: ' + first.note : '';
-      sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימותממתינות לך.' + details);
+      sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימות ממתינות לך.' + details);
     } else {
       sendSystemNotification('📅 תזכורת בוקר', 'הלו"ז היומי פנוי, היכנסי לשבץ משימות בבנק!');
     }
@@ -421,34 +420,35 @@ function renderWeek(){
       const t = getTask(tId);
       if(!t) return;
       const c = getCat(t.cat);
-      cardsHtml += `<div class="sched-card ${t.done?'done':''}" style="background:${c.color};border-color:${c.border}">` +
+      const isShort = t.duration === 'short';
+      const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+      
+      cardsHtml += '<div class="sched-card ' + (t.done ? 'done' : '') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
           '<div style="display:flex;align-items:flex-start;gap:5px;">' +
-            `<div class="task-check ${t.done?'checked':''}" style="width:15px;height:15px;margin-top:1px;" onclick="toggleTask('${t.id}')">` +
-              `<span class="chk-mark" style="color:${c.text};font-size:8px;">✓</span>` +
+            '<div class="task-check ' + (t.done ? 'checked' : '') + '" style="width:15px;height:15px;margin-top:2px;" onclick="toggleTask(\'' + t.id + '\')">' +
+              '<span class="chk-mark" style="color:' + c.text + ';font-size:8px;">✓</span>' +
             '</div>' +
-            `<div class="sched-title" style="color:${c.text}">${esc(t.title)}</div>` +
+            '<div class="sched-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
           '</div>' +
           '<div class="sched-meta">' +
-            `<span style="font-size:9px;color:${c.text}aa;font-weight:700;">${c.name}</span>` +
-            `<span class="duration-tag ${t.duration==='short'?'dur-short':'dur-long'}" style="font-size:8px;padding:0 4px;">` +
-              (t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\'') +
-            '</span>' +
+            '<span style="font-size:9px;color:' + c.text + ';font-weight:700;">' + c.name + '</span>' +
+            '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '" style="font-size:8px;padding:0 4px;">' + timeTagText + '</span>' +
           '</div>' +
           '<div class="sched-actions">' +
-            `<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal('edit','${t.id}')">` +
+            '<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal(\'edit\',\'' + t.id + '\')">' +
               '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>' +
             '</button>' +
-            `<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay('${d.key}','${t.id}')">` +
+            '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay(\'' + d.key + '\',\'' + t.id + '\')">' +
               '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
             '</button>' +
           '</div>' +
         '</div>';
     });
 
-    return `<div class="day-slot ${d.weekend?'weekend-slot':''}" id="slot_${d.key}" data-dayname="${d.full}" data-daydate="${wDates[d.key]}" ` +
-        `ondragover="dragOver(event,'${d.key}')" ondragleave="dragLeave(event,'${d.key}')" ondrop="dropOnDay(event,'${d.key}')">` +
-        `<div class="day-slot-tasks">${cardsHtml}</div>` +
-        `<div class="day-slot-add" onclick="openModal('addDay','${d.key}')">+</div>` +
+    return '<div class="day-slot ' + (d.weekend ? 'weekend-slot' : '') + '" id="slot_' + d.key + '" data-dayname="' + d.full + '" data-daydate="' + wDates[d.key] + '" ' +
+        'ondragover="dragOver(event,\'' + d.key + '\')" ondragleave="dragLeave(event,\'' + d.key + '\')" ondrop="dropOnDay(event,\'' + d.key + '\')">' +
+        '<div class="day-slot-tasks">' + cardsHtml + '</div>' +
+        '<div class="day-slot-add" onclick="openModal(\'addDay\',\'' + d.key + '\')">+</div>' +
       '</div>';
   }).join('');
   
@@ -521,7 +521,11 @@ function dropOnDay(e,k){
 function renderPills(){
   const el=document.getElementById('catPills');
   let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')">הכל</span>';
-  cats.forEach(c=>{ h+=`<span class="pill ${filter===c.id?'active':''}" style="color:${c.text};border-color:${filter===c.id?c.border:'transparent'}" onclick="setFilter('${c.id}')">${c.name}</span>`; });
+  cats.forEach(c=>{ 
+    const isActive = filter === c.id;
+    h += '<span class="pill ' + (isActive ? 'active' : '') + '" style="color:' + c.text + ';border-color:' + (isActive ? c.border : 'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' +
+         '<span class="pill-dot" style="background:' + c.text + '"></span>' + c.name + '</span>'; 
+  });
   h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')">✓ הושלם</span>';
   el.innerHTML=h;
 }
@@ -539,24 +543,29 @@ function renderTasks(){
 
   el.innerHTML=list.map(t=>{
     const c=getCat(t.cat);
-    return `<div class="task-card fade-in ${t.done?'done':''}" style="border-color:${c.border}; background:linear-gradient(135deg, #fff, ${c.color}22)" ` +
-      `draggable="true" ondragstart="event.dataTransfer.setData('taskId','${t.id}')">` +
-      `<div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}')">` +
-        `<span class="chk-mark" style="color:${c.text}">✓</span>` +
+    const isShort = t.duration === 'short';
+    const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+    
+    return '<div class="task-card fade-in ' + (t.done ? 'done' : '') + '" style="border-color:' + c.border + '; background:linear-gradient(135deg, #fff, ' + c.color + '22)" ' +
+      'draggable="true" ondragstart="event.dataTransfer.setData(\'taskId\',\'' + t.id + '\')">' +
+      '<div class="task-check ' + (t.done ? 'checked' : '') + '" onclick="toggleTask(\'' + t.id + '\')">' +
+        '<span class="chk-mark" style="color:' + c.text + '">✓</span>' +
       '</div>' +
       '<div class="task-content">' +
-        `<div class="task-title" style="color:${c.text}">${esc(t.title)}</div>` +
-        (t.note?`<div class="task-note">${esc(t.note)}</div>`:'') +
+        '<div class="task-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
+        (t.note ? '<div class="task-note">' + esc(t.note) + '</div>' : '') +
         '<div class="task-meta">' +
-          `<span class="cat-badge" style="background:#fff;color:${c.text};border-color:${c.border}">${c.name}</span>` +
-          `<span class="duration-tag ${t.duration==='short'?'dur-short':'dur-long'}">${t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\''}</span>` +
-          (t.prio==='high'?'<span class="prio-tag prio-high">🔥 גבוהה</span>':'') +
-          (t.due?`<span style="font-size:10px;color:#9ca3af;">📅 ${t.due.split('-').reverse().join('/')}</span>`:'') +
+          '<span class="cat-badge" style="background:#fff;color:' + c.text + ';border-color:' + c.border + '">' +
+            '<span class="badge-dot" style="background:' + c.text + '"></span>' + c.name + 
+          '</span>' +
+          '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
+          (t.prio === 'high' ? '<span class="prio-tag prio-high">🔥 גבוהה</span>' : '') +
+          (t.due ? '<span style="font-size:10px;color:#9ca3af;">📅 ' + t.due.split('-').reverse().join('/') + '</span>' : '') +
         '</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
-        `<button class="btn-icon" onclick="openModal('edit','${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>` +
-        `<button class="btn-icon danger" onclick="deleteTask('${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>` +
+        '<button class="btn-icon" onclick="openModal(\'edit\',\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>' +
+        '<button class="btn-icon danger" onclick="deleteTask(\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -572,10 +581,10 @@ function renderCatSidebar(){
   const el=document.getElementById('catSidebar');
   const counts={}; tasks.forEach(t=>{ if(!t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
-    `<div class="cat-item" style="background:${c.color};border-color:${c.border}" onclick="setFilter('${c.id}')">` +
-      `<div class="cat-dot" style="background:${c.text}"></div>` +
-      `<div class="cat-name" style="color:${c.text}">${esc(c.name)}</div>` +
-      `<div class="cat-count" style="color:${c.text};font-weight:700;">${counts[c.id]||0}</div>` +
+    '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '" onclick="setFilter(\'' + c.id + '\')">' +
+      '<div class="cat-dot" style="background:' + c.text + '"></div>' +
+      '<div class="cat-name" style="color:' + c.text + '">' + esc(c.name) + '</div>' +
+      '<div class="cat-count" style="color:' + c.text + ';font-weight:700;">' + (counts[c.id] || 0) + '</div>' +
     '</div>').join('') + '</div>';
 }
 
@@ -597,34 +606,34 @@ function openModal(type,id){
 
   if(type==='add'||type==='edit'){
     const t=id?getTask(id):null; editId=id||null;
-    const catOpts=cats.map(c=>`<option value="${c.id}" ${t&&t.cat===c.id?'selected':''}>${c.name}</option>`).join('');
+    const catOpts=cats.map(c=>'<option value="' + c.id + '" ' + (t&&t.cat===c.id?'selected':'') + '>' + c.name + '</option>').join('');
     
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        `<div class="modal-title">${t?'✏️ עריכת משימה':'✨ משימה חדשה'}</div>` +
+        '<div class="modal-title">' + (t ? '✏️ עריכת משימה' : '✨ משימה חדשה') + '</div>' +
         '<div class="form-group"><label class="form-label">שם המשימה *</label>' +
-          `<input id="f_title" class="form-input" type="text" placeholder="מה המשימה שלך?" value="${t?esc(t.title):''}"></div>` +
+          '<input id="f_title" class="form-input" type="text" placeholder="מה המשימה שלך?" value="' + (t?esc(t.title):'') + '"></div>' +
         '<div class="form-row">' +
-          `<div class="form-group" style="flex:1"><label class="form-label">קטגוריה</label><select id="f_cat" class="form-input">${catOpts}</select></div>` +
+          '<div class="form-group" style="flex:1"><label class="form-label">קטגוריה</label><select id="f_cat" class="form-input">' + catOpts + '</select></div>' +
           '<div class="form-group" style="flex:1"><label class="form-label">אורך זמן המשימה</label>' +
             '<select id="f_duration" class="form-input">' +
-              `<option value="long" ${t&&t.duration==='long'?'selected':''}>⏳ מעל 5 דקות (משימה רגילה)</option>` +
-              `<option value="short" ${t&&t.duration==='short'?'selected':''}>⚡ עד 5 דקות (משימה מהירה)</option>` +
-            </select></div>' +
+              '<option value="long" ' + (t&&t.duration==='long'?'selected':'') + '>⏳ מעל 5 דקות (משימה רגילה)</option>' +
+              '<option value="short" ' + (t&&t.duration==='short'?'selected':'') + '>⚡ עד 5 דקות (משימה מהירה)</option>' +
+            '</select></div>' +
         '</div>' +
         '<div class="form-row">' +
-          `<div class="form-group" style="flex:1"><label class="form-label">תאריך יעד</label><input id="f_due" class="form-input" type="date" value="${t&&t.due?t.due:''}"></div>` +
+          '<div class="form-group" style="flex:1"><label class="form-label">תאריך יעד</label><input id="f_due" class="form-input" type="date" value="' + (t&&t.due?t.due:'') + '"></div>' +
           '<div class="form-group" style="flex:1"><label class="form-label">רמת עדיפות (דחיפות)</label>' +
             '<select id="f_prio" class="form-input">' +
               '<option value="">רגילה</option>' +
-              `<option value="high" ${t&&t.prio==='high'?'selected':''}>🔥 גבוהה (יעלה ראשון בלו"ז האוטומטי)</option>` +
-            </select></div>' +
+              '<option value="high" ' + (t&&t.prio==='high'?'selected':'') + '>🔥 גבוהה (יעלה ראשון בלו"ז האוטומטי)</option>' +
+            '</select></div>' +
         '</div>' +
         '<div class="form-group"><label class="form-label">הערות ופרטים נוספים</label>' +
-          `<textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">${t&&t.note?esc(t.note):''}</textarea></div>` +
+          '<textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">' + (t&&t.note?esc(t.note):'') + '</textarea></div>' +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          `<button class="btn-primary" onclick="saveTask()">${t?'שמור':'הוסף לבנק'}</button>` +
+          '<button class="btn-primary" onclick="saveTask()">' + (t?'שמור':'הוסף לבנק') + '</button>' +
         '</div>' +
       '</div></div>';
   } 
@@ -633,10 +642,10 @@ function openModal(type,id){
       '<div class="modal fade-in">' +
         '<div class="modal-title">בחרי רמת עומס ללו"ז האוטומטי</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(1)">' +
-          '<div class="opt-title">בסיסי- משימה אחת ביום</div>' +
+          '<div class="opt-title">בסיסי - משימה אחת ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
-          '<div class="opt-title">מתקדם- עד 3 משימות ביום</div>' +
+          '<div class="opt-title">מתקדם - עד 3 משימות ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
           '<div class="opt-title">שגרה מלאה - עד 5 משימות ביום</div>' +
@@ -646,16 +655,16 @@ function openModal(type,id){
   }
   else if(type==='addDay'){
     const free=tasks.filter(t=>!t.done);
-    const opts=free.length?free.map(t=>{const c=getCat(t.cat); return `<option value="${t.id}">[${c.name}] ${esc(t.title)}</option>`;}).join(''):'<option value="">-- אין משימות פנויות --</option>';
+    const opts=free.length?free.map(t=>{const c=getCat(t.cat); return '<option value="' + t.id + '">[' + c.name + '] ' + esc(t.title) + '</option>';}).join(''):'<option value="">-- אין משימות פנויות --</option>';
     const dayObj = DAYS.find(d=>d.key===id);
     
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        `<div class="modal-title">➕ הוספת משימה ליום ${dayObj.full}</div>` +
-        `<div class="form-group"><label class="form-label">בחרי משימה מהבנק</label><select id="d_task" class="form-input">${opts}</select></div>` +
+        '<div class="modal-title">➕ הוספת משימה ליום ' + dayObj.full + '</div>' +
+        '<div class="form-group"><label class="form-label">בחרי משימה מהבנק</label><select id="d_task" class="form-input">' + opts + '</select></div>' +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          `<button class="btn-primary" onclick="assignToDay('${id}')">שבץ בלו"ז</button>` +
+          '<button class="btn-primary" onclick="assignToDay(\'' + id + '\')">שבץ בלו"ז</button>' +
         '</div>' +
       '</div></div>';
   }
