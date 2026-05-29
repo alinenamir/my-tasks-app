@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>משימות ✦</title>
+  <title>משימות</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="משימות ✦">
+  <meta name="apple-mobile-web-app-title" content="משימות">
 </head>
 <body>
 
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght=300;400;500;600;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Heebo',sans-serif;direction:rtl;background:#f8f7f4;color:#111827;min-height:100vh;-webkit-text-size-adjust:100%;padding:0;margin:0;}
   h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
@@ -67,6 +67,7 @@
   .btn-auto{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Heebo',sans-serif;transition:opacity .15s;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(124,58,237,0.25);}
   .btn-auto:hover{opacity:.9;}
   .btn-ghost{background:none;border:1px solid #e5e7eb;border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Heebo',sans-serif;color:#6b7280;}
+  .btn-ghost:hover{background:#f9fafb;}
   .btn-icon{background:none;border:none;cursor:pointer;border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:#9ca3af;}
   .btn-icon:hover{background:#f3f4f6;color:#374151;}
   .btn-icon.danger:hover{background:#fee2e2;color:#dc2626;}
@@ -85,7 +86,7 @@
   .task-card{border-radius:10px;padding:11px 13px;border:1.5px solid transparent;display:flex;align-items:flex-start;gap:10px;background:#fff;cursor:grab;}
   .task-card.done .task-title{text-decoration:line-through;opacity:.45;}
   
-  .task-check{width:18px;height:18px;border-radius:50%;border:2px solid rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .task-check{width:18px;height:18px;border-radius:50%;border:2px solid rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;flex-shrink:0;}
   .task-check.checked{background:rgba(0,0,0,0.12);}
   .chk-mark{display:none;font-size:10px;}
   .task-check.checked .chk-mark{display:block;}
@@ -143,7 +144,7 @@
 <h2 class="sr-only">מנהל משימות חכם</h2>
 <div class="app">
   <div class="app-header">
-    <div class="app-logo">מש<span>ׂ</span>ימות <span>✦</span></div>
+    <div class="app-logo">משימות <span>✦</span></div>
     <div class="app-tagline">אנחנו לא בהשוואה — אנחנו בהשראה</div>
   </div>
 
@@ -162,10 +163,11 @@
   </div>
 
   <div class="main-layout">
+    <!-- שמאל: הלו"ז השבועי -->
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">📅 הלו"ז השבועי המדויק</div>
+          <div class="panel-title">הלוז השבועי</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;" id="weekLabel"></div>
         </div>
         <button class="btn-auto" onclick="openModal('chooseLevel')">
@@ -179,6 +181,7 @@
       </div>
     </div>
     
+    <!-- ימין: בנק המשימות וקטגוריות -->
     <div class="right-col">
       <div class="panel">
         <div class="panel-header">
@@ -248,7 +251,7 @@ let editId=null;
 function getWeekDates() {
   const now = new Date();
   const currentDay = now.getDay();
-  const startOfWeek = new Date(now);
+  const startOfWeek = new Date(now.getTime());
   startOfWeek.setDate(now.getDate() - currentDay);
 
   let dates = {};
@@ -322,7 +325,7 @@ function updatePersistentLockBanner() {
   
   if (todayKey === 'sat') {
     document.getElementById('bannerText').innerHTML = '📌 <strong>משימה לשבת:</strong> להכין לוז משימות ולוז חוויות ✨';
-    banner.style.style.display = 'flex';
+    banner.style.display = 'flex';
     return;
   }
 
@@ -385,7 +388,7 @@ function checkAlarmClock() {
     if (todayTasks.length > 0) {
       const first = todayTasks[0];
       const details = first.note ? '\n📝 פרטים: ' + first.note : '';
-      sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימות ממתינות לך.' + details);
+      sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימותממתינות לך.' + details);
     } else {
       sendSystemNotification('📅 תזכורת בוקר', 'הלו"ז היומי פנוי, היכנסי לשבץ משימות בבנק!');
     }
@@ -418,34 +421,34 @@ function renderWeek(){
       const t = getTask(tId);
       if(!t) return;
       const c = getCat(t.cat);
-      cardsHtml += '<div class="sched-card' + (t.done?' done':'') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
+      cardsHtml += `<div class="sched-card ${t.done?'done':''}" style="background:${c.color};border-color:${c.border}">` +
           '<div style="display:flex;align-items:flex-start;gap:5px;">' +
-            '<div class="task-check' + (t.done?' checked':'') + '" style="width:15px;height:15px;margin-top:1px;" onclick="toggleTask(\'' + t.id + '\')">' +
-              '<span class="chk-mark" style="color:' + c.text + ';font-size:8px;">✓</span>' +
+            `<div class="task-check ${t.done?'checked':''}" style="width:15px;height:15px;margin-top:1px;" onclick="toggleTask('${t.id}')">` +
+              `<span class="chk-mark" style="color:${c.text};font-size:8px;">✓</span>` +
             '</div>' +
-            '<div class="sched-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
+            `<div class="sched-title" style="color:${c.text}">${esc(t.title)}</div>` +
           '</div>' +
           '<div class="sched-meta">' +
-            '<span style="font-size:9px;color:' + c.text + 'aa;font-weight:700;">' + c.name + '</span>' +
-            '<span class="duration-tag ' + (t.duration==='short'?'dur-short':'dur-long') + '" style="font-size:8px;padding:0 4px;">' +
+            `<span style="font-size:9px;color:${c.text}aa;font-weight:700;">${c.name}</span>` +
+            `<span class="duration-tag ${t.duration==='short'?'dur-short':'dur-long'}" style="font-size:8px;padding:0 4px;">` +
               (t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\'') +
             '</span>' +
           '</div>' +
           '<div class="sched-actions">' +
-            '<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal(\'edit\',\'' + t.id + '\')">' +
+            `<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal('edit','${t.id}')">` +
               '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>' +
             '</button>' +
-            '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay(\'' + d.key + '\',\'' + t.id + '\')">' +
+            `<button class="btn-icon danger" style="width:20px;height:20px;" onclick="removeFromDay('${d.key}','${t.id}')">` +
               '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
             '</button>' +
           '</div>' +
         '</div>';
     });
 
-    return '<div class="day-slot' + (d.weekend?' weekend-slot':'') + '" id="slot_' + d.key + '" data-dayname="' + d.full + '" data-daydate="' + wDates[d.key] + '" ' +
-        'ondragover="dragOver(event,\'' + d.key + '\')" ondragleave="dragLeave(event,\'' + d.key + '\')" ondrop="dropOnDay(event,\'' + d.key + '\')">' +
-        '<div class="day-slot-tasks">' + cardsHtml + '</div>' +
-        '<div class="day-slot-add" onclick="openModal(\'addDay\',\'' + d.key + '\')">+</div>' +
+    return `<div class="day-slot ${d.weekend?'weekend-slot':''}" id="slot_${d.key}" data-dayname="${d.full}" data-daydate="${wDates[d.key]}" ` +
+        `ondragover="dragOver(event,'${d.key}')" ondragleave="dragLeave(event,'${d.key}')" ondrop="dropOnDay(event,'${d.key}')">` +
+        `<div class="day-slot-tasks">${cardsHtml}</div>` +
+        `<div class="day-slot-add" onclick="openModal('addDay','${d.key}')">+</div>` +
       '</div>';
   }).join('');
   
@@ -518,7 +521,7 @@ function dropOnDay(e,k){
 function renderPills(){
   const el=document.getElementById('catPills');
   let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')">הכל</span>';
-  cats.forEach(c=>{ h+='<span class="pill' + (filter===c.id?' active':'') + '" style="color:' + c.text + ';border-color:' + (filter===c.id?c.border:'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' + c.name + '</span>'; });
+  cats.forEach(c=>{ h+=`<span class="pill ${filter===c.id?'active':''}" style="color:${c.text};border-color:${filter===c.id?c.border:'transparent'}" onclick="setFilter('${c.id}')">${c.name}</span>`; });
   h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')">✓ הושלם</span>';
   el.innerHTML=h;
 }
@@ -536,24 +539,24 @@ function renderTasks(){
 
   el.innerHTML=list.map(t=>{
     const c=getCat(t.cat);
-    return '<div class="task-card fade-in' + (t.done?' done':'') + '" style="border-color:' + c.border + '; background:linear-gradient(135deg, #fff, ' + c.color + '22)" ' +
-      'draggable="true" ondragstart="event.dataTransfer.setData(\'taskId\',\'' + t.id + '\')">' +
-      '<div class="task-check' + (t.done?' checked':'') + '" onclick="toggleTask(\'' + t.id + '\')">' +
-        '<span class="chk-mark" style="color:' + c.text + '">✓</span>' +
+    return `<div class="task-card fade-in ${t.done?'done':''}" style="border-color:${c.border}; background:linear-gradient(135deg, #fff, ${c.color}22)" ` +
+      `draggable="true" ondragstart="event.dataTransfer.setData('taskId','${t.id}')">` +
+      `<div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}')">` +
+        `<span class="chk-mark" style="color:${c.text}">✓</span>` +
       '</div>' +
       '<div class="task-content">' +
-        '<div class="task-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
-        (t.note?'<div class="task-note">' + esc(t.note) + '</div>':'') +
+        `<div class="task-title" style="color:${c.text}">${esc(t.title)}</div>` +
+        (t.note?`<div class="task-note">${esc(t.note)}</div>`:'') +
         '<div class="task-meta">' +
-          '<span class="cat-badge" style="background:#fff;color:' + c.text + ';border-color:' + c.border + '">' + c.name + '</span>' +
-          '<span class="duration-tag ' + (t.duration==='short'?'dur-short':'dur-long') + '">' + (t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\'') + '</span>' +
+          `<span class="cat-badge" style="background:#fff;color:${c.text};border-color:${c.border}">${c.name}</span>` +
+          `<span class="duration-tag ${t.duration==='short'?'dur-short':'dur-long'}">${t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\''}</span>` +
           (t.prio==='high'?'<span class="prio-tag prio-high">🔥 גבוהה</span>':'') +
-          (t.due?'<span style="font-size:10px;color:#9ca3af;">📅 ' + t.due.split('-').reverse().join('/') + '</span>':'') +
-        '/div>' +
+          (t.due?`<span style="font-size:10px;color:#9ca3af;">📅 ${t.due.split('-').reverse().join('/')}</span>`:'') +
+        '</div>' +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:2px;">' +
-        '<button class="btn-icon" onclick="openModal(\'edit\',\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>' +
-        '<button class="btn-icon danger" onclick="deleteTask(\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>' +
+      '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
+        `<button class="btn-icon" onclick="openModal('edit','${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>` +
+        `<button class="btn-icon danger" onclick="deleteTask('${t.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>` +
       '</div>' +
     '</div>';
   }).join('');
@@ -569,10 +572,10 @@ function renderCatSidebar(){
   const el=document.getElementById('catSidebar');
   const counts={}; tasks.forEach(t=>{ if(!t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
-    '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '" onclick="setFilter(\'' + c.id + '\')">' +
-      '<div class="cat-dot" style="background:' + c.text + '"></div>' +
-      '<div class="cat-name" style="color:' + c.text + '">' + esc(c.name) + '</div>' +
-      '<div class="cat-count" style="color:' + c.text + ';font-weight:700;">' + (counts[c.id]||0) + '</div>' +
+    `<div class="cat-item" style="background:${c.color};border-color:${c.border}" onclick="setFilter('${c.id}')">` +
+      `<div class="cat-dot" style="background:${c.text}"></div>` +
+      `<div class="cat-name" style="color:${c.text}">${esc(c.name)}</div>` +
+      `<div class="cat-count" style="color:${c.text};font-weight:700;">${counts[c.id]||0}</div>` +
     '</div>').join('') + '</div>';
 }
 
@@ -594,63 +597,65 @@ function openModal(type,id){
 
   if(type==='add'||type==='edit'){
     const t=id?getTask(id):null; editId=id||null;
-    const catOpts=cats.map(c=>'<option value="' + c.id + '"' + (t&&t.cat===c.id?' selected':'') + '>' + c.name + '</option>').join('');
+    const catOpts=cats.map(c=>`<option value="${c.id}" ${t&&t.cat===c.id?'selected':''}>${c.name}</option>`).join('');
+    
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        '<div class="modal-title">' + (t?'✏️ עריכת משימה':'✨ משימה חדשה') + '</div>' +
+        `<div class="modal-title">${t?'✏️ עריכת משימה':'✨ משימה חדשה'}</div>` +
         '<div class="form-group"><label class="form-label">שם המשימה *</label>' +
-          '<input id="f_title" class="form-input" type="text" placeholder="מה המשימה שלך?" value="' + (t?esc(t.title):'') + '"></div>' +
+          `<input id="f_title" class="form-input" type="text" placeholder="מה המשימה שלך?" value="${t?esc(t.title):''}"></div>` +
         '<div class="form-row">' +
-          '<div class="form-group" style="flex:1"><label class="form-label">קטגוריה</label><select id="f_cat" class="form-input">' + catOpts + '</select></div>' +
+          `<div class="form-group" style="flex:1"><label class="form-label">קטגוריה</label><select id="f_cat" class="form-input">${catOpts}</select></div>` +
           '<div class="form-group" style="flex:1"><label class="form-label">אורך זמן המשימה</label>' +
             '<select id="f_duration" class="form-input">' +
-              '<option value="long" ' + (t&&t.duration==='long'?'selected':'') + '>⏳ מעל 5 דקות (משימה רגילה)</option>' +
-              '<option value="short" ' + (t&&t.duration==='short'?'selected':'') + '>⚡ עד 5 דקות (משימה מהירה)</option>' +
-            '</select></div>' +
+              `<option value="long" ${t&&t.duration==='long'?'selected':''}>⏳ מעל 5 דקות (משימה רגילה)</option>` +
+              `<option value="short" ${t&&t.duration==='short'?'selected':''}>⚡ עד 5 דקות (משימה מהירה)</option>` +
+            </select></div>' +
         '</div>' +
         '<div class="form-row">' +
-          '<div class="form-group" style="flex:1"><label class="form-label">תאריך יעד</label><input id="f_due" class="form-input" type="date" value="' + (t&&t.due?t.due:'') + '"></div>' +
+          `<div class="form-group" style="flex:1"><label class="form-label">תאריך יעד</label><input id="f_due" class="form-input" type="date" value="${t&&t.due?t.due:''}"></div>` +
           '<div class="form-group" style="flex:1"><label class="form-label">רמת עדיפות (דחיפות)</label>' +
             '<select id="f_prio" class="form-input">' +
               '<option value="">רגילה</option>' +
-              '<option value="high" ' + (t&&t.prio==='high'?'selected':'') + '>🔥 גבוהה (יעלה ראשון בלו"ז האוטומטי)</option>' +
-            '</select></div>' +
+              `<option value="high" ${t&&t.prio==='high'?'selected':''}>🔥 גבוהה (יעלה ראשון בלו"ז האוטומטי)</option>` +
+            </select></div>' +
         '</div>' +
         '<div class="form-group"><label class="form-label">הערות ופרטים נוספים</label>' +
-          '<textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">' + (t&&t.note?esc(t.note):'') + '</textarea></div>' +
+          `<textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">${t&&t.note?esc(t.note):''}</textarea></div>` +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          '<button class="btn-primary" onclick="saveTask()">' + (t?'שמור':'הוסף לבנק') + '</button>' +
+          `<button class="btn-primary" onclick="saveTask()">${t?'שמור':'הוסף לבנק'}</button>` +
         '</div>' +
       '</div></div>';
   } 
   else if(type==='chooseLevel') {
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal fade-in">' +
-        '<div class="modal-title">⚙️ בחרי רמת עומס ללו"ז האוטומטי</div>' +
-        '<p style="font-size:12px;color:#6b7280;margin-bottom:14px;">האלגוריתם ישבץ קודם כל משימות בעדיפות גבוהה (🔥), ולאחר מכן ישלב משימות קצרות וארוכות.</p>' +
+        '<div class="modal-title">בחרי רמת עומס ללו"ז האוטומטי</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(1)">' +
-          '<div class="opt-title">🌱 רמה בסיסית</div><div class="opt-desc">עד משימה אחת ביום (משימות דחופות קודמות לכל).</div>' +
+          '<div class="opt-title">בסיסי- משימה אחת ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
-          '<div class="opt-title">⚡ רמה מתקדמת</div><div class="opt-desc">עד 3 משימות ביום (קצב עבודה מצוין).</div>' +
+          '<div class="opt-title">מתקדם- עד 3 משימות ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
-          '<div class="opt-title">🚀 שגרה מלאה</div><div class="opt-desc">עד 5 משימות ביום (פרודוקטיביות מקסימלית).</div>' +
+          '<div class="opt-title">שגרה מלאה - עד 5 משימות ביום</div>' +
         '</div>' +
         '<div class="modal-actions"><button class="btn-ghost" onclick="closeModal()">סגור</button></div>' +
       '</div></div>';
   }
   else if(type==='addDay'){
     const free=tasks.filter(t=>!t.done);
-    const opts=free.length?free.map(t=>{const c=getCat(t.cat); return '<option value="' + t.id + '">[' + c.name + '] ' + esc(t.title) + '</option>';}).join(''):'<option value="">-- אין משימות פנויות --</option>';
+    const opts=free.length?free.map(t=>{const c=getCat(t.cat); return `<option value="${t.id}">[${c.name}] ${esc(t.title)}</option>`;}).join(''):'<option value="">-- אין משימות פנויות --</option>';
+    const dayObj = DAYS.find(d=>d.key===id);
+    
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        '<div class="modal-title">➕ הוספת משימה ליום ' + DAYS.find(d=>d.key===id).full + '</div>' +
-        '<div class="form-group"><label class="form-label">בחרי משימה מהבנק</label><select id="d_task" class="form-input">' + opts + '</select></div>' +
+        `<div class="modal-title">➕ הוספת משימה ליום ${dayObj.full}</div>` +
+        `<div class="form-group"><label class="form-label">בחרי משימה מהבנק</label><select id="d_task" class="form-input">${opts}</select></div>` +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          '<button class="btn-primary" onclick="assignToDay(\'' + id + '\')">שבץ בלו"ז</button>' +
+          `<button class="btn-primary" onclick="assignToDay('${id}')">שבץ בלו"ז</button>` +
         '</div>' +
       '</div></div>';
   }
@@ -666,9 +671,9 @@ function openModal(type,id){
   else if(type==='saturdayReport'){
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        '<div class="modal-title">📊 משימה לשבת: לו"ז משימות ולו"ז חוויות ✨</div>' +
+        '<div class="modal-title">משימה לשבת: לו"ז משימות ולו"ז חוויות</div>' +
         '<p style="font-size:13px;color:#4b5563;line-height:1.5;">הגיע הזמן לעצור, לקחת נשימה ולתכנן את השבוע הבא בכיף וברוגע!</p>' +
-        '<div class="modal-actions"><button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal()">הבנתי, שבוע מדהים בפתח! ✨</button></div>' +
+        '<div class="modal-actions"><button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal()">הבנתי, שבוע מדהים בפתח!</button></div>' +
       '</div></div>';
   }
 }
