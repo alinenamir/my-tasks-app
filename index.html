@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>משימות ✦</title>
   
+  <!-- התאמה לאייפון -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="משימות ✦">
@@ -15,12 +16,15 @@
   body{font-family:'Heebo',sans-serif;direction:rtl;background:#f8f7f4;color:#111827;min-height:100vh;-webkit-text-size-adjust:100%;}
   h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
   .app{max-width:1300px;margin:0 auto;padding:20px 16px;}
+  
+  /* ראש עמוד נקי לחלוטין ללא כפתורי סנכרון מפריעים */
   .app-header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e5e7eb;position:relative;}
   .app-logo{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
   .app-logo span{color:#a78bfa;}
   .app-tagline{font-size:13px;color:#9ca3af;margin-top:4px;font-style:italic;}
-
-  .sync-bar {position:absolute;top:5px;left:5px;display:flex;gap:5px;}
+  
+  /* שורת סנכרון תחתונה - בסוף האפליקציה */
+  .footer-sync-bar {display:flex;justify-content:center;gap:12px;margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;}
 
   /* NOTIFICATION BAR */
   .notification-panel {display:flex;justify-content:center;margin-bottom:20px;}
@@ -147,10 +151,6 @@
 <h2 class="sr-only">מנהל משימות חכם</h2>
 <div class="app">
   <div class="app-header">
-    <div class="sync-bar">
-      <button class="btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="exportData()" title="העתק קוד סנכרון">📤 ייצוא סנכרון</button>
-      <button class="btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="importData()" title="הדבק קוד מהמכשיר השני">📥 יבוא סנכרון</button>
-    </div>
     <div class="app-logo">מש<span>ׂ</span>ימות <span>✦</span></div>
     <div class="app-tagline">אנחנו לא בהשוואה — אנחנו בהשראה</div>
   </div>
@@ -170,6 +170,7 @@
   </div>
 
   <div class="main-layout">
+    <!-- שמאל: הלו"ז השבועי -->
     <div class="panel">
       <div class="panel-header">
         <div>
@@ -187,6 +188,7 @@
       </div>
     </div>
     
+    <!-- ימין: בנק המשימות וקטגוריות -->
     <div class="right-col">
       <div class="panel">
         <div class="panel-header">
@@ -214,7 +216,14 @@
       </div>
     </div>
   </div>
+
+  <!-- שורת סנכרון מעוצבת ונקייה - בסוף האפליקציה (למטה) -->
+  <div class="footer-sync-bar">
+    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="exportData()" title="העתק קוד סנכרון">📤 ייצוא סנכרון</button>
+    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="importData()" title="הדבק קוד מהמכשיר השני">📥 יבוא סנכרון</button>
+  </div>
 </div>
+
 <div id="modalContainer"></div>
 
 <script>
@@ -229,19 +238,21 @@ const DAYS=[
 ];
 const DC=[
   {id:'exp',name:'חוויות',color:'#fce7f3',text:'#9d174d',border:'#f9a8d4'},
-  {id:'study',name:'לימודים وعתיד',color:'#dcfce7',text:'#166534',border:'#86efac'},
+  {id:'study',name:'לימודים ועתיד',color:'#dcfce7',text:'#166534',border:'#86efac'},
   {id:'health',name:'בריאות ואישי',color:'#ffedd5',text:'#9a3412',border:'#fdba74'},
   {id:'work',name:'עבודה',color:'#e0f2fe',text:'#075985',border:'#7dd3fc'},
   {id:'money',name:'כספים',color:'#fef9c3',text:'#854d0e',border:'#fde047'},
   {id:'social',name:'קשרים חברתיים',color:'#dbeafe',text:'#1e40af',border:'#93c5fd'}
 ];
 
-let cats=JSON.parse(localStorage.getItem('mish_cats')||'null')||DC;
+let cats=JSON.parse(localStorage.getItem('mish_cats')) || DC;
+if(!localStorage.getItem('mish_cats')) {
+  localStorage.setItem('mish_cats', JSON.stringify(DC));
+}
+
 let tasks=JSON.parse(localStorage.getItem('mish_tasks')||'[]');
-// שונה למבנה מערכים לכל יום כדי לתמוך בריבוי משימות ביום!
 let schedule=JSON.parse(localStorage.getItem('mish_sched_multi')||'{"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]}');
 
-// אם קיים זיכרון ישן (במבנה מחרוזת בודדת), נשדרג אותו אוטומטית למערך
 if(localStorage.getItem('mish_sched') && !localStorage.getItem('mish_sched_multi')) {
   try {
     let old=JSON.parse(localStorage.getItem('mish_sched')||'{}');
@@ -252,12 +263,11 @@ if(localStorage.getItem('mish_sched') && !localStorage.getItem('mish_sched_multi
 let filter='all';
 let editId=null;
 
-// חישוב תאריכי השבוע הנוכחי (ראשון עד שבת)
 function getWeekDates() {
   const now = new Date();
-  const currentDay = now.getDay(); // 0 = ראשון, 6 = שבת
+  const currentDay = now.getDay();
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - currentDay); // מכוון ליום ראשון הקרוב בעבר
+  startOfWeek.setDate(now.getDate() - currentDay);
 
   let dates = {};
   DAYS.forEach(d => {
@@ -266,7 +276,7 @@ function getWeekDates() {
     let day = String(target.getDate()).padStart(2, '0');
     let month = String(target.getMonth() + 1).padStart(2, '0');
     dates[d.key] = `${day}/${month}`;
-    dates[d.key+'_iso'] = target.toISOString().split('T')[0]; // YYYY-MM-DD
+    dates[d.key+'_iso'] = target.toISOString().split('T')[0];
   });
   return dates;
 }
@@ -285,7 +295,6 @@ function getTodayKey() {
   return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
 }
 
-// סנכרון חצי-אוטומטי פשוט בין מחשב לטלפון
 function exportData() {
   const packageStr = btoa(encodeURIComponent(JSON.stringify({cats, tasks, schedule})));
   navigator.clipboard.writeText(packageStr);
@@ -304,20 +313,16 @@ function importData() {
   } catch(e){ alert('שגיאה בפענוח הקוד.'); }
 }
 
-// בדיקת שיבוץ אוטומטי של משימות עם תאריכים מדויקים
 function autoAssignTasksByDate() {
   const wDates = getWeekDates();
   let changed = false;
 
   tasks.forEach(t => {
     if(t.due && !t.done) {
-      // נבדוק אם התאריך של המשימה נופל בשבוע הנוכחי
       DAYS.forEach(d => {
         const isoDate = wDates[d.key+'_iso'];
         if(t.due === isoDate) {
-          // אם המשימה לא משובצת כבר ביום הזה, נשבץ
           if(!schedule[d.key].includes(t.id)) {
-            // נסיר אותה מימים אחרים קודם שלא תהיה כפילות
             DAYS.forEach(day => { schedule[day] = schedule[day].filter(id => id !== t.id); });
             schedule[d.key].push(t.id);
             changed = true;
@@ -329,7 +334,6 @@ function autoAssignTasksByDate() {
   if(changed) save();
 }
 
-// עדכון פס ההתרעה העליון
 function updatePersistentLockBanner() {
   const banner = document.getElementById('persistentBanner');
   const todayKey = getTodayKey();
@@ -378,23 +382,20 @@ function sendSystemNotification(title, body) {
   }
 }
 
-// שעון פנימי להתראות קבועות
 function checkAlarmClock() {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
-  const currentDayIndex = now.getDay(); // 6 = שבת
+  const currentDayIndex = now.getDay();
   const todayStr = now.toDateString();
   
   if (localStorage.getItem('last_noti_date') === todayStr) return;
 
-  // שבת ב-09:00
   if (currentDayIndex === 6 && currentHour === 9 && currentMinute === 0) {
     sendSystemNotification('📊 משימה לשבת', 'להכין לוז משימות ולוז חוויות ✨');
     localStorage.setItem('last_noti_date', todayStr);
     openModal('saturdayReport');
   } 
-  // ימי חול ב-07:00
   else if (currentDayIndex !== 6 && currentHour === 7 && currentMinute === 0) {
     const todayKey = getTodayKey();
     const todayTasks = (schedule[todayKey] || []).map(getTask).filter(t => t && !t.done);
@@ -423,12 +424,10 @@ function renderWeek(){
 
   document.getElementById('weekLabel').textContent = totalFilled ? `${totalDone} מתוך ${totalFilled} משימות שבועיות הושלמו` : 'הלו"ז ריק. לחצי לייצור אוטומטי או הוסיפי ידנית';
   
-  // כותרות ימים עם תאריכים
   document.getElementById('dayHeaders').innerHTML=DAYS.map(d=>`
     <div class="day-header${d.weekend?' weekend':''}">${d.label}<span>${wDates[d.key]}</span></div>
   `).join('');
   
-  // משבצות ימים
   document.getElementById('daySlots').innerHTML=DAYS.map(d=>{
     const tIds = schedule[d.key] || [];
     let cardsHtml = '';
@@ -448,7 +447,7 @@ function renderWeek(){
           <div class="sched-meta">
             <span style="font-size:9px;color:${c.text}aa;font-weight:700;">${c.name}</span>
             <span class="duration-tag ${t.duration==='short'?'dur-short':'dur-long'}" style="font-size:8px;padding:0 4px;">
-              ${t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\''}
+              ${t.duration==='short'?'⚡ עד 5 דק\'':'⏳ מעל 5 דק\'}
             </span>
           </div>
           <div class="sched-actions">
@@ -480,11 +479,9 @@ function removeFromDay(dayKey, taskId){
   save(); renderWeek();
 }
 
-// ייצור לו"ז אוטומטי חכם עם חלוקת עומסים וזמנים (עד 5 דקות / מעל 5 דקות)
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
   
-  // אוספים את כל המשימות הפנויות (שאינן מבוצעות ולא משובצות בשום יום)
   const usedIds = [];
   Object.values(schedule).forEach(arr => usedIds.push(...arr));
   const freeTasks = tasks.filter(t => !t.done && !usedIds.includes(t.id));
@@ -494,18 +491,23 @@ function generateScheduleWithLevel(maxPerDay) {
     closeModal(); return;
   }
 
-  // מחלקים את המשימות הפנויות לפי אורך זמן
-  let shortTasks = freeTasks.filter(t => t.duration === 'short');
-  let longTasks = freeTasks.filter(t => t.duration !== 'short');
+  let urgentTasks = freeTasks.filter(t => t.prio === 'high');
+  let regularTasks = freeTasks.filter(t => t.prio !== 'high');
+
+  let shortTasks = regularTasks.filter(t => t.duration === 'short');
+  let longTasks = regularTasks.filter(t => t.duration !== 'short');
 
   weekdayKeys.forEach(k => {
     if(!schedule[k]) schedule[k] = [];
     
-    // כמה משימות עוד אפשר להוסיף ליום הזה כדי להגיע לרמה שנבחרה
     let slotsAvailable = maxPerDay - schedule[k].length;
     if (slotsAvailable <= 0) return;
 
-    // חוק ברזל: תמיד מנסים לשלב לפחות משימה קצרה אחת (עד 5 דק') ומשימה ארוכה אחת
+    while (slotsAvailable > 0 && urgentTasks.length > 0) {
+      schedule[k].push(urgentTasks.shift().id);
+      slotsAvailable--;
+    }
+
     if (slotsAvailable >= 1 && shortTasks.length > 0) {
       schedule[k].push(shortTasks.shift().id);
       slotsAvailable--;
@@ -515,7 +517,6 @@ function generateScheduleWithLevel(maxPerDay) {
       slotsAvailable--;
     }
 
-    // אם נשארו מקומות פנויים באותו יום, נמלא משאר המאגר הפנוי
     while(slotsAvailable > 0 && (shortTasks.length > 0 || longTasks.length > 0)) {
       let nextTask = shortTasks.length > 0 ? shortTasks.shift() : longTasks.shift();
       schedule[k].push(nextTask.id);
@@ -534,7 +535,6 @@ function dropOnDay(e,k){
   if(tId){
     if(!schedule[k]) schedule[k] = [];
     if(!schedule[k].includes(tId)) {
-      // מסיר מימים אחרים למניעת כפילות בגרירה
       DAYS.forEach(day => { schedule[day] = (schedule[day]||[]).filter(id => id !== tId); });
       schedule[k].push(tId);
       save(); renderWeek();
@@ -636,11 +636,14 @@ function openModal(type,id){
             </select></div>
         </div>
         <div class="form-row">
-          <div class="form-group" style="flex:1"><label class="form-label">תאריך יעד (ישובץ אוטומטית ביום המתאים)</label><input id="f_due" class="form-input" type="date" value="${t&&t.due?t.due:''}"></div>
-          <div class="form-group" style="flex:1"><label class="form-label">עדיפות גבוהה?</label>
-            <select id="f_prio" class="form-input"><option value="">לא</option><option value="high" ${t&&t.prio==='high'?'selected':''}>🔥 כן (יופיע ראשון)</option></select></div>
+          <div class="form-group" style="flex:1"><label class="form-label">תאריך יעד</label><input id="f_due" class="form-input" type="date" value="${t&&t.due?t.due:''}"></div>
+          <div class="form-group" style="flex:1"><label class="form-label">רמת עדיפות (דחיפות)</label>
+            <select id="f_prio" class="form-input">
+              <option value="">רגילה</option>
+              <option value="high" ${t&&t.prio==='high'?'selected':''}>🔥 גבוהה (יעלה ראשון בלו"ז האוטומטי)</option>
+            </select></div>
         </div>
-        <div class="form-group"><label class="form-label">הערות ופרטים נוספים (יופיעו גם בהתראה של האייפון)</label>
+        <div class="form-group"><label class="form-label">הערות ופרטים נוספים</label>
           <textarea id="f_note" class="form-input form-textarea" placeholder="הוסיפי פרטים כאן...">${t&&t.note?esc(t.note):''}</textarea></div>
         <div class="modal-actions">
           <button class="btn-ghost" onclick="closeModal()">ביטול</button>
@@ -652,9 +655,9 @@ function openModal(type,id){
     mc.innerHTML=`<div class="modal-overlay" onclick="closeBg(event)">
       <div class="modal fade-in">
         <div class="modal-title">⚙️ בחרי רמת עומס ללו"ז האוטומטי</div>
-        <p style="font-size:12px;color:#6b7280;margin-bottom:14px;">האלגוריתם ישבץ משימות פנויות וישלב משימות קצרות וארוכות יחד בכל יום.</p>
+        <p style="font-size:12px;color:#6b7280;margin-bottom:14px;">האלגוריתם ישבץ קודם כל משימות בעדיפות גבוהה (🔥), ולאחר מכן ישלב משימות קצרות וארוכות.</p>
         <div class="opt-box" onclick="generateScheduleWithLevel(1)">
-          <div class="opt-title">🌱 רמה בסיסית</div><div class="opt-desc">עד משימה אחת ביום (אידיאלי לשבועות רגועים).</div>
+          <div class="opt-title">🌱 רמה בסיסית</div><div class="opt-desc">עד משימה אחת ביום (משימות דחופות קודמות לכל).</div>
         </div>
         <div class="opt-box" onclick="generateScheduleWithLevel(3)">
           <div class="opt-title">⚡ רמה מתקדמת</div><div class="opt-desc">עד 3 משימות ביום (קצב עבודה מצוין).</div>
