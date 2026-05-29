@@ -4,29 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>משימות</title>
-  
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="משימות">
-</head>
-<body>
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght=300;400;500;600;700&display=swap">
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght=300;400;500;600;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Heebo',sans-serif;direction:rtl;background:#f8f7f4;color:#111827;min-height:100vh;-webkit-text-size-adjust:100%;padding:0;margin:0;}
   h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
   .app{max-width:1300px;margin:0 auto;padding:20px 16px;}
   
-  .app-header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e5e7eb;position:relative;}
+  .app-header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e5e7eb;}
   .app-logo{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
   .app-logo span{color:#a78bfa;}
   .app-tagline{font-size:13px;color:#9ca3af;margin-top:4px;font-style:italic;}
   
   .footer-sync-bar {display:flex;justify-content:center;gap:12px;margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;}
-
   .notification-panel {display:flex;justify-content:center;margin-bottom:20px;}
-  .btn-noti {background:#fff;color:#4b5563;border:1px solid #d1d5db;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Heebo',sans-serif;transition:all .15s;display:flex;align-items:center;gap:6px;}
+  .btn-noti {background:#fff;color:#4b5563;border:1px solid #d1d5db;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;}
   .btn-noti.active {background:#ecfdf5;color:#059669;border-color:#10b981;}
 
   .alert-banner {background:linear-gradient(90deg, #fee2e2, #fef2f2);border:1px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:20px;display:none;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 14px rgba(220,38,38,0.08);}
@@ -62,11 +54,10 @@
   .panel-header{padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
   .panel-title{font-size:16px;font-weight:600;white-space:nowrap;}
   .panel-body{padding:16px 20px;}
-  .btn-primary{background:#111827;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Heebo',sans-serif;transition:opacity .15s;display:flex;align-items:center;gap:5px;}
-  .btn-primary:hover{opacity:.82;}
-  .btn-auto{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Heebo',sans-serif;transition:opacity .15s;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(124,58,237,0.25);}
-  .btn-auto:hover{opacity:.9;}
-  .btn-ghost{background:none;border:1px solid #e5e7eb;border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Heebo',sans-serif;color:#6b7280;}
+  
+  .btn-primary{background:#111827;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .btn-auto{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(124,58,237,0.25);}
+  .btn-ghost{background:none;border:1px solid #e5e7eb;border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;color:#6b7280;}
   .btn-ghost:hover{background:#f9fafb;}
   .btn-icon{background:none;border:none;cursor:pointer;border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:#9ca3af;}
   .btn-icon:hover{background:#f3f4f6;color:#374151;}
@@ -77,7 +68,7 @@
   .pill.active{border-color:currentColor;background:rgba(0,0,0,0.03);}
   .pill-all.active{background:#111827;color:#fff;}
   .pill-done.active{background:#6b7280;color:#fff;}
-  .pill-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .pill-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
   
   .prog-wrap{height:4px;background:#f3f4f6;border-radius:100px;margin-bottom:16px;overflow:hidden;}
   .prog-bar{height:100%;background:#a78bfa;transition:width .4s;}
@@ -94,13 +85,14 @@
   .task-content{flex:1;min-width:0;}
   .task-title{font-size:14px;font-weight:500;line-height:1.4;text-align:right;}
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
-  .cat-badge{font-size:11px;font-weight:500;padding:1px 7px;border-radius:100px;border:1px solid rgba(0,0,0,0.09);display:inline-flex;align-items:center;gap:4px;}
-  .badge-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+  
+  /* עיצוב משופר עם עיגול צבעוני מסביב לקטגוריות בבנק המשימות */
+  .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;gap:5px;background:#fff;}
+  .badge-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
   
   .duration-tag {font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .dur-short {background:#e0f2fe;color:#0369a1;}
   .dur-long {background:#f3e8ff;color:#6b21a8;}
-
   .prio-tag{font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .prio-high{background:#fee2e2;color:#dc2626;}
   .task-note{font-size:11px;color:#6b7280;margin-top:3px;text-align:right;}
@@ -112,7 +104,7 @@
   .day-slot-add {text-align:center;font-size:18px;color:#c4b5fd;cursor:pointer;padding:2px 0;border-radius:6px;}
   .day-slot-add:hover {background:rgba(0,0,0,0.03);color:#7c3aed;}
 
-  .sched-card{border-radius:8px;padding:8px;border:1.5px solid transparent;display:flex;flex-direction:column;gap:4px;position:relative;width:100%;box-shadow:0 1px 3px rgba(0,0,0,0.02);}
+  .sched-card{border-radius:8px;padding:8px;border:1.5px solid transparent;display:flex;flex-direction:column;gap:4px;position:relative;width:100%;box-shadow:0 1px 3px rgba(0,0,0,0.02);margin-bottom:2px;}
   .sched-card.done .sched-title{text-decoration:line-through;opacity:.45;}
   .sched-title{font-size:12.5px;font-weight:600;line-height:1.3;text-align:right;padding-left:35px;}
   .sched-meta {display:flex;justify-content:space-between;align-items:center;margin-top:2px;}
@@ -124,7 +116,7 @@
   .modal-title{font-size:17px;font-weight:600;margin-bottom:16px;text-align:right;}
   .form-group{margin-bottom:12px;text-align:right;}
   .form-label{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:4px;display:block;}
-  .form-input{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Heebo',sans-serif;background:#fff;text-align:right;}
+  .form-input{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;background:#fff;text-align:right;}
   .form-textarea{resize:vertical;min-height:60px;}
   .form-row{display:flex;gap:10px;}
   .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
@@ -134,13 +126,17 @@
   .opt-title {font-weight:700;font-size:14px;color:#111827;margin-bottom:2px;}
 
   .cat-list{display:flex;flex-direction:column;gap:6px;}
-  .cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.05);cursor:pointer;}
+  .cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.05);position:relative;}
   .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .cat-name{font-size:12px;font-weight:500;flex:1;text-align:right;}
-  .cat-count{font-size:11px;}
+  .cat-name{font-size:12px;font-weight:500;flex:1;text-align:right;cursor:pointer;}
+  .cat-count{font-size:11px;margin-left:55px;font-weight:700;}
+  .cat-item-actions {position:absolute;left:8px;display:flex;gap:4px;}
+  
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
   </style>
+</head>
+<body>
 
 <h2 class="sr-only">מנהל משימות חכם</h2>
 <div class="app">
@@ -167,7 +163,7 @@
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">הלוז השבועי הימני</div>
+          <div class="panel-title">הלוז השבועי</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;" id="weekLabel"></div>
         </div>
         <button class="btn-auto" onclick="openModal('chooseLevel')">
@@ -210,8 +206,8 @@
   </div>
 
   <div class="footer-sync-bar">
-    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="exportData()" title="העתק קוד סנכרון">📤 ייצוא סנכרון</button>
-    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="importData()" title="הדבק קוד מהמכשיר השני">📥 יבוא סנכרון</button>
+    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="exportData()">📤 ייצוא סנכרון</button>
+    <button class="btn-ghost" style="padding:6px 12px;font-size:12px;background:#fff;" onclick="importData()">📥 יבוא סנכרון</button>
   </div>
 </div>
 
@@ -231,21 +227,20 @@ const DC=[
   {id:'exp',name:'חוויות',color:'#fce7f3',text:'#9d174d',border:'#f9a8d4'},
   {id:'study',name:'לימודים ועתיד',color:'#dcfce7',text:'#166534',border:'#86efac'},
   {id:'health',name:'בריאות ואישי',color:'#ffedd5',text:'#9a3412',border:'#fdba74'},
-  {id:'work',name:'עבודה',color:'#e0f2fe',text:'#075985',border:'#7dd3fc'},
+  {idwork',name:'עבודה',color:'#e0f2fe',text:'#075985',border:'#7dd3fc'},
   {id:'money',name:'כספים',color:'#fef9c3',text:'#854d0e',border:'#fde047'},
   {id:'social',name:'קשרים חברתיים',color:'#dbeafe',text:'#1e40af',border:'#93c5fd'}
 ];
 
 let cats=JSON.parse(localStorage.getItem('mish_cats')) || DC;
-if(!localStorage.getItem('mish_cats')) {
-  localStorage.setItem('mish_cats', JSON.stringify(DC));
-}
+if(!localStorage.getItem('mish_cats')) { localStorage.setItem('mish_cats', JSON.stringify(DC)); }
 
 let tasks=JSON.parse(localStorage.getItem('mish_tasks')||'[]');
 let schedule=JSON.parse(localStorage.getItem('mish_sched_multi')||'{"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]}');
 
 let filter='all';
 let editId=null;
+let editCatId=null;
 
 function getWeekDates() {
   const now = new Date();
@@ -274,10 +269,7 @@ function getCat(id){return cats.find(c=>c.id===id)||{name:'?',color:'#f3f4f6',te
 function uid(){return Math.random().toString(36).slice(2,10);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function getTask(id){return tasks.find(t=>t.id===id)||null;}
-
-function getTodayKey() {
-  return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
-}
+function getTodayKey() { return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()]; }
 
 function exportData() {
   const packageStr = btoa(encodeURIComponent(JSON.stringify({cats, tasks, schedule})));
@@ -300,7 +292,6 @@ function importData() {
 function autoAssignTasksByDate() {
   const wDates = getWeekDates();
   let changed = false;
-
   tasks.forEach(t => {
     if(t.due && !t.done) {
       DAYS.forEach(d => {
@@ -321,16 +312,13 @@ function autoAssignTasksByDate() {
 function updatePersistentLockBanner() {
   const banner = document.getElementById('persistentBanner');
   const todayKey = getTodayKey();
-  
   if (todayKey === 'sat') {
     document.getElementById('bannerText').innerHTML = '📌 <strong>משימה לשבת:</strong> להכין לוז משימות ולוז חוויות ✨';
     banner.style.display = 'flex';
     return;
   }
-
   const todayTaskIds = schedule[todayKey] || [];
   const activeTodayTasks = todayTaskIds.map(getTask).filter(t => t && !t.done);
-
   if (activeTodayTasks.length > 0) {
     const titles = activeTodayTasks.map(t => t.title).join(', ');
     document.getElementById('bannerText').innerHTML = '⚠️ <strong>ממתין ל-V היום:</strong> ' + esc(titles);
@@ -372,7 +360,6 @@ function checkAlarmClock() {
   const currentMinute = now.getMinutes();
   const currentDayIndex = now.getDay();
   const todayStr = now.toDateString();
-  
   if (localStorage.getItem('last_noti_date') === todayStr) return;
 
   if (currentDayIndex === 6 && currentHour === 9 && currentMinute === 0) {
@@ -383,7 +370,6 @@ function checkAlarmClock() {
   else if (currentDayIndex !== 6 && currentHour === 7 && currentMinute === 0) {
     const todayKey = getTodayKey();
     const todayTasks = (schedule[todayKey] || []).map(getTask).filter(t => t && !t.done);
-    
     if (todayTasks.length > 0) {
       const first = todayTasks[0];
       const details = first.note ? '\n📝 פרטים: ' + first.note : '';
@@ -398,8 +384,8 @@ function checkAlarmClock() {
 function renderWeek(){
   autoAssignTasksByDate();
   const wDates = getWeekDates();
-  
   let totalFilled = 0, totalDone = 0;
+  
   DAYS.forEach(d => {
     const tList = (schedule[d.key]||[]).map(getTask).filter(Boolean);
     totalFilled += tList.length;
@@ -407,10 +393,7 @@ function renderWeek(){
   });
 
   document.getElementById('weekLabel').textContent = totalFilled ? totalDone + ' מתוך ' + totalFilled + ' משימות שבועיות הושלמו' : 'הלו"ז ריק. לחצי לייצור אוטומטי או הוסיפי ידנית';
-  
-  document.getElementById('dayHeaders').innerHTML=DAYS.map(d=>
-    '<div class="day-header' + (d.weekend?' weekend':'') + '">' + d.label + '<span>' + wDates[d.key] + '</span></div>'
-  ).join('');
+  document.getElementById('dayHeaders').innerHTML=DAYS.map(d=> '<div class="day-header' + (d.weekend?' weekend':'') + '">' + d.label + '<span>' + wDates[d.key] + '</span></div>' ).join('');
   
   document.getElementById('daySlots').innerHTML=DAYS.map(d=>{
     const tIds = schedule[d.key] || [];
@@ -451,7 +434,6 @@ function renderWeek(){
         '<div class="day-slot-add" onclick="openModal(\'addDay\',\'' + d.key + '\')">+</div>' +
       '</div>';
   }).join('');
-  
   updatePersistentLockBanner();
 }
 
@@ -462,9 +444,11 @@ function removeFromDay(dayKey, taskId){
 
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
-  const usedIds = [];
-  Object.values(schedule).forEach(arr => usedIds.push(...arr));
-  const freeTasks = tasks.filter(t => !t.done && !usedIds.includes(t.id));
+  
+  // איפוס השיבוצים הישנים בימי החול כדי לאפשר חלוקה מחדש מלאה ונכונה
+  weekdayKeys.forEach(k => { schedule[k] = []; });
+  
+  const freeTasks = tasks.filter(t => !t.done);
 
   if(!freeTasks.length) {
     alert('אין משימות פנויות בבנק לשיבוץ אוטומטי! 📋');
@@ -477,9 +461,7 @@ function generateScheduleWithLevel(maxPerDay) {
   let longTasks = regularTasks.filter(t => t.duration !== 'short');
 
   weekdayKeys.forEach(k => {
-    if(!schedule[k]) schedule[k] = [];
-    let slotsAvailable = maxPerDay - schedule[k].length;
-    if (slotsAvailable <= 0) return;
+    let slotsAvailable = maxPerDay;
 
     while (slotsAvailable > 0 && urgentTasks.length > 0) {
       schedule[k].push(urgentTasks.shift().id);
@@ -499,7 +481,6 @@ function generateScheduleWithLevel(maxPerDay) {
       slotsAvailable--;
     }
   });
-
   save(); renderWeek(); closeModal();
 }
 
@@ -523,7 +504,7 @@ function renderPills(){
   let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')">הכל</span>';
   cats.forEach(c=>{ 
     const isActive = filter === c.id;
-    h += '<span class="pill ' + (isActive ? 'active' : '') + '" style="color:' + c.text + ';border-color:' + (isActive ? c.border : 'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' +
+    h += '<span class="pill ' + (isActive ? 'active' : '') + '" style="color:' + c.text + ';border-color:' + c.text + '" onclick="setFilter(\'' + c.id + '\')">' +
          '<span class="pill-dot" style="background:' + c.text + '"></span>' + c.name + '</span>'; 
   });
   h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')">✓ הושלם</span>';
@@ -533,7 +514,6 @@ function renderPills(){
 function renderTasks(){
   const el=document.getElementById('taskList');
   let list = filter==='done' ? tasks.filter(t=>t.done) : (filter==='all' ? tasks.filter(t=>!t.done) : tasks.filter(t=>t.cat===filter&&!t.done));
-  
   list = [...list].sort((a,b)=> (a.prio==='high'?0:1) - (b.prio==='high'?0:1));
   
   if(!list.length){
@@ -555,7 +535,7 @@ function renderTasks(){
         '<div class="task-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
         (t.note ? '<div class="task-note">' + esc(t.note) + '</div>' : '') +
         '<div class="task-meta">' +
-          '<span class="cat-badge" style="background:#fff;color:' + c.text + ';border-color:' + c.border + '">' +
+          '<span class="cat-badge" style="color:' + c.text + ';border-color:' + c.text + '">' +
             '<span class="badge-dot" style="background:' + c.text + '"></span>' + c.name + 
           '</span>' +
           '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
@@ -580,12 +560,24 @@ function renderProgress(){
 function renderCatSidebar(){
   const el=document.getElementById('catSidebar');
   const counts={}; tasks.forEach(t=>{ if(!t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
+  
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
-    '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '" onclick="setFilter(\'' + c.id + '\')">' +
+    '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '">' +
       '<div class="cat-dot" style="background:' + c.text + '"></div>' +
-      '<div class="cat-name" style="color:' + c.text + '">' + esc(c.name) + '</div>' +
-      '<div class="cat-count" style="color:' + c.text + ';font-weight:700;">' + (counts[c.id] || 0) + '</div>' +
+      '<div class="cat-name" style="color:' + c.text + '" onclick="setFilter(\'' + c.id + '\')">' + esc(c.name) + '</div>' +
+      '<div class="cat-count" style="color:' + c.text + '">' + (counts[c.id] || 0) + '</div>' +
+      '<div class="cat-item-actions">' +
+        '<button class="btn-icon" style="width:20px;height:20px;color:' + c.text + '" onclick="openModal(\'editCat\',\'' + c.id + '\')">✏️</button>' +
+        '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="deleteCat(\'' + c.id + '\')">❌</button>' +
+      '</div>' +
     '</div>').join('') + '</div>';
+}
+
+function deleteCat(catId) {
+  if(confirm('האם את בטוחה שברצונך למחוק קטגוריה זו? המשימות המשויכות אליה לא יימחקו.')) {
+    cats = cats.filter(c => c.id !== catId);
+    save(); render();
+  }
 }
 
 function render(){renderPills();renderTasks();renderProgress();renderCatSidebar();renderWeek();}
@@ -646,7 +638,7 @@ function openModal(type,id){
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
           '<div class="opt-title">מתקדם - עד 3 משימות ביום</div>' +
-        '</div>' +
+        }
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
           '<div class="opt-title">שגרה מלאה - עד 5 משימות ביום</div>' +
         '</div>' +
@@ -668,13 +660,16 @@ function openModal(type,id){
         '</div>' +
       '</div></div>';
   }
-  else if(type==='cat'){
+  else if(type==='cat' || type==='editCat'){
+    const c = type === 'editCat' ? cats.find(curr => curr.id === id) : null;
+    editCatId = c ? c.id : null;
+    
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        '<div class="modal-title">🏷️ קטגוריה חדשה</div>' +
-        '<div class="form-group"><label class="form-label">שם הקטגוריה *</label><input id="c_name" class="form-input" type="text" placeholder="לדוגמה: סידורים"></div>' +
-        '<div class="form-group"><label class="form-label">צבע רקע</label><input id="c_color" type="color" class="form-input" style="height:40px;padding:2px;" value="#e8f4fd"></div>' +
-        '<div class="modal-actions"><button class="btn-ghost" onclick="closeModal()">ביטול</button><button class="btn-primary" onclick="saveCat()">הוסף</button></div>' +
+        '<div class="modal-title">' + (c ? '✏️ עריכת קטגוריה' : '🏷️ קטגוריה חדשה') + '</div>' +
+        '<div class="form-group"><label class="form-label">שם הקטגוריה *</label><input id="c_name" class="form-input" type="text" placeholder="לדוגמה: סידורים" value="' + (c ? esc(c.name) : '') + '"></div>' +
+        '<div class="form-group"><label class="form-label">צבע רקע</label><input id="c_color" type="color" class="form-input" style="height:40px;padding:2px;" value="' + (c ? c.color : '#e8f4fd') + '"></div>' +
+        '<div class="modal-actions"><button class="btn-ghost" onclick="closeModal()">ביטול</button><button class="btn-primary" onclick="saveCat()">' + (c ? 'שמור שינויים' : 'הוסף') + '</button></div>' +
       '</div></div>';
   }
   else if(type==='saturdayReport'){
@@ -687,7 +682,7 @@ function openModal(type,id){
   }
 }
 
-function closeModal(){document.getElementById('modalContainer').innerHTML=''; editId=null;}
+function closeModal(){document.getElementById('modalContainer').innerHTML=''; editId=null; editCatId=null;}
 function closeBg(e){if(e.target.classList.contains('modal-overlay'))closeModal();}
 
 function assignToDay(k){
@@ -697,24 +692,37 @@ function assignToDay(k){
 }
 
 function saveTask(){
-  const title=document.getElementById('f_title').value.trim();
-  if(!title){alert('אנא הזיני שם משימה'); return;}
-  const cat=document.getElementById('f_cat').value, duration=document.getElementById('f_duration').value,
-        due=document.getElementById('f_due').value, prio=document.getElementById('f_prio').value, note=document.getElementById('f_note').value.trim();
-  
-  if(editId){
-    const t=getTask(editId);
-    if(t){Object.assign(t, {title, cat, duration, due, prio, note});}
-  }else{
-    tasks.unshift({id:uid(), title, cat, duration, due, prio, note, done:false, created:Date.now()});
-  }
-  save(); render(); closeModal();
+  try {
+    const title=document.getElementById('f_title').value.trim();
+    if(!title){alert('אנא הזיני שם משימה'); return;}
+    
+    const cat=document.getElementById('f_cat').value;
+    const duration=document.getElementById('f_duration').value;
+    const due=document.getElementById('f_due') ? document.getElementById('f_due').value : '';
+    const prio=document.getElementById('f_prio') ? document.getElementById('f_prio').value : '';
+    const note=document.getElementById('f_note') ? document.getElementById('f_note').value.trim() : '';
+    
+    if(editId){
+      const t=getTask(editId);
+      if(t){ Object.assign(t, {title, cat, duration, due, prio, note}); }
+    }else{
+      tasks.unshift({id:uid(), title, cat, duration, due, prio, note, done:false, created:Date.now()});
+    }
+    save(); render(); 
+  } catch(e) { console.error(e); }
+  closeModal();
 }
 
 function saveCat(){
   const name=document.getElementById('c_name').value.trim(); if(!name) return;
   const color=document.getElementById('c_color').value;
-  cats.push({id:uid(), name, color, text:'#111827', border:color, custom:true});
+  
+  if(editCatId) {
+    const c = cats.find(curr => curr.id === editCatId);
+    if(c) { c.name = name; c.color = color; c.border = color; }
+  } else {
+    cats.push({id:uid(), name, color, text:'#111827', border:color, custom:true});
+  }
   save(); render(); closeModal();
 }
 
