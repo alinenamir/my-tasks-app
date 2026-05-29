@@ -86,8 +86,8 @@
   .task-title{font-size:14px;font-weight:500;line-height:1.4;text-align:right;}
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
   
-  .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;gap:5px;background:#fff;}
-  .badge-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  /* תגיות קטגוריה בעיצוב המקורי לחלוטין - אליפסה קטנה ונקייה */
+  .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;background:#fff;}
   
   .duration-tag {font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .dur-short {background:#e0f2fe;color:#0369a1;}
@@ -128,8 +128,13 @@
   .cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.05);position:relative;}
   .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .cat-name{font-size:12px;font-weight:500;flex:1;text-align:right;cursor:pointer;}
-  .cat-count{font-size:11px;margin-left:55px;font-weight:700;}
-  .cat-item-actions {position:absolute;left:8px;display:flex;gap:4px;}
+  .cat-count{font-size:11px;margin-left:75px;font-weight:700;}
+  
+  /* סימון עדין ונקי בצד שמאל לניהול קטגוריות ללא אימוג'ים */
+  .cat-item-actions {position:absolute;left:8px;display:flex;gap:6px;}
+  .cat-btn-text {background:none;border:none;font-size:11px;font-weight:500;cursor:pointer;color:#6b7280;padding:2px 4px;border-radius:4px;}
+  .cat-btn-text:hover {background:rgba(0,0,0,0.05);color:#111827;}
+  .cat-btn-text.danger:hover {background:#fee2e2;color:#dc2626;}
   
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -463,32 +468,44 @@ function generateScheduleWithLevel(maxPerDay) {
     closeModal(); return;
   }
 
-  let urgentTasks = freeTasks.filter(t => t.prio === 'high');
-  let regularTasks = freeTasks.filter(t => t.prio !== 'high');
-  let shortTasks = regularTasks.filter(t => t.duration === 'short');
-  let longTasks = regularTasks.filter(t => t.duration !== 'short');
+  // חלוקת משימות לפי קבוצות: דחופות, מהירות (משימה קטנה) ורגילות (משימה גדולה)
+  let urgent = freeTasks.filter(t => t.prio === 'high');
+  let nonUrgent = freeTasks.filter(t => t.prio !== 'high');
+  
+  let shortTasks = nonUrgent.filter(t => t.duration === 'short');
+  let longTasks = nonUrgent.filter(t => t.duration !== 'short');
 
   weekdayKeys.forEach(k => {
     let slotsAvailable = maxPerDay;
 
-    while (slotsAvailable > 0 && urgentTasks.length > 0) {
-      schedule[k].push(urgentTasks.shift().id);
+    // שלב 1: שיבוץ משימות דחופות קודם כל
+    while (slotsAvailable > 0 && urgent.length > 0) {
+      schedule[k].push(urgent.shift().id);
       slotsAvailable--;
     }
-    if (slotsAvailable >= 1 && shortTasks.length > 0) {
-      schedule[k].push(shortTasks.shift().id);
-      slotsAvailable--;
+
+    // שלב 2: שילוב חובה של תמיד משימה קטנה ומשימה גדולה (אם יש מקום פנוי ביום)
+    if (slotsAvailable >= 2) {
+      if (shortTasks.length > 0 && longTasks.length > 0) {
+        schedule[k].push(shortTasks.shift().id);
+        schedule[k].push(longTasks.shift().id);
+        slotsAvailable -= 2;
+      }
     }
-    if (slotsAvailable >= 1 && longTasks.length > 0) {
-      schedule[k].push(longTasks.shift().id);
-      slotsAvailable--;
-    }
-    while(slotsAvailable > 0 && (shortTasks.length > 0 || longTasks.length > 0)) {
-      let nextTask = shortTasks.length > 0 ? shortTasks.shift() : longTasks.shift();
-      schedule[k].push(nextTask.id);
-      slotsAvailable--;
+
+    // שלב 3: מילוי שאר המקומות הפנויים ביום בצורה מאוזנת
+    while (slotsAvailable > 0 && (shortTasks.length > 0 || longTasks.length > 0)) {
+      if (shortTasks.length > 0) {
+        schedule[k].push(shortTasks.shift().id);
+        slotsAvailable--;
+      }
+      if (slotsAvailable > 0 && longTasks.length > 0) {
+        schedule[k].push(longTasks.shift().id);
+        slotsAvailable--;
+      }
     }
   });
+
   save(); renderWeek(); closeModal();
 }
 
@@ -546,9 +563,7 @@ function renderTasks(){
         '<div class="task-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
         (t.note ? '<div class="task-note">' + esc(t.note) + '</div>' : '') +
         '<div class="task-meta">' +
-          '<span class="cat-badge" style="color:' + c.text + ';border-color:' + c.text + '">' +
-            '<span class="badge-dot" style="background:' + c.text + '"></span>' + c.name + 
-          '</span>' +
+          '<span class="cat-badge" style="color:' + c.text + ';border-color:' + c.text + '">' + c.name + '</span>' +
           '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
           (t.prio === 'high' ? '<span class="prio-tag prio-high">🔥 גבוהה</span>' : '') +
           (t.due ? '<span style="font-size:10px;color:#9ca3af;">📅 ' + dateStr + '</span>' : '') +
@@ -581,8 +596,8 @@ function renderCatSidebar(){
       '<div class="cat-name" style="color:' + c.text + '" onclick="setFilter(\'' + c.id + '\')">' + esc(c.name) + '</div>' +
       '<div class="cat-count" style="color:' + c.text + '">' + (counts[c.id] || 0) + '</div>' +
       '<div class="cat-item-actions">' +
-        '<button class="btn-icon" style="width:20px;height:20px;color:' + c.text + '" onclick="openModal(\'editCat\',\'' + c.id + '\')">✏️</button>' +
-        '<button class="btn-icon danger" style="width:20px;height:20px;" onclick="deleteCat(\'' + c.id + '\')">❌</button>' +
+        '<button class="cat-btn-text" onclick="openModal(\'editCat\',\'' + c.id + '\')">ערוך</button>' +
+        '<button class="cat-btn-text danger" onclick="deleteCat(\'' + c.id + '\')">מחק</button>' +
       '</div>' +
     '</div>').join('') + '</div>';
 }
