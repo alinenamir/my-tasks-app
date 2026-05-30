@@ -130,7 +130,6 @@
   .color-opt-btn {border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 4px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
   .color-opt-btn.selected {border-color:#111827 !important;box-shadow:0 0 0 2.5px rgba(0,0,0,0.15);transform:scale(1.04);}
    
-  /* התראה צפה מעוצבת למובייל לעקיפת חסימות דפדפן */
   .toast-alert {position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:#111827;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 10px 3px rgba(0,0,0,0.1);z-index:9999;width:calc(100% - 32px);max-width:380px;direction:rtl;transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);cursor:pointer;}
   .toast-alert.show {transform:translateX(-50%) translateY(0);}
   .toast-title {font-weight:700;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
@@ -238,10 +237,13 @@ const CUSTOM_COLORS_PALETTE = [
   {color:'#e2e8f0',text:'#334155',border:'#cbd5e1',name:'אפור אלגנט'}
 ];
 
-// פתרון טעינה בטוח למניעת התרסקויות בטלפון
 let cats = [];
 let tasks = [];
 let schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
+let filter = 'all';
+let editId = null;
+let editCatId = null;
+let selectedCatColor = '';
 
 function loadStorageSafely() {
   try {
@@ -258,7 +260,6 @@ function loadStorageSafely() {
     }
     DAYS.forEach(d => { if(!Array.isArray(schedule[d.key])) schedule[d.key] = []; });
   } catch (e) {
-    // מנגנון הגנה למובייל במקרה ש-localStorage חסום לחלוטין
     cats = [...CUSTOM_COLORS_PALETTE.slice(0,3).map((c,i)=>({id:'cat_'+i, name:['משימות אישיות','עבודה ולימודים','פנאי'][i], color:c.color, text:c.text, border:c.border}))];
     tasks = [];
     schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
@@ -331,7 +332,6 @@ function requestNotificationPermission() {
 }
 
 function sendSystemNotification(title, body) {
-  // פתרון התראה מעוצב ישיר למובייל - עוקף את חסימות מערכת ההפעלה של הטלפון
   const toast = document.getElementById('toastAlert');
   const toastBody = document.getElementById('toastBody');
   if(toast && toastBody) {
@@ -340,7 +340,6 @@ function sendSystemNotification(title, body) {
     setTimeout(() => { toast.classList.remove('show'); }, 6000);
   }
 
-  // ניסיון שליחה במערכת הרגילה אם היא מאופשרת
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification(title, { body: body });
@@ -759,7 +758,7 @@ function openModal(type,id){
         '</div>' +
         '<div class="modal-actions" style="margin-top:12px;">' +
           '<button class="btn-ghost" onclick="closeModal()">סגור</button>' +
-        </div>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }
