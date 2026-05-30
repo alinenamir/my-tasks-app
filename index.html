@@ -21,24 +21,24 @@
   .btn-noti {background:#fff;color:#4b5563;border:1px solid #d1d5db;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;}
   .btn-noti.active {background:#ecfdf5;color:#059669;border-color:#10b981;}
 
-  .alert-banner {background:linear-gradient(90deg, #fee2e2, #fef2f2);border:1px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:20px;display:none;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 14px rgba(220,38,38,0.08);}
-  .alert-banner-content {display:flex;align-items:center;gap:10px;flex:1;}
-  .alert-banner-text {font-size:13.5px;font-weight:600;color:#991b1b;line-height:1.4;}
+  /* שורה אדומה חלקה ונקייה */
+  .alert-banner {background:linear-gradient(90deg, #fee2e2, #fef2f2);border:1px solid #fca5a5;border-radius:12px;height:14px;margin-bottom:20px;display:none;box-shadow:0 4px 14px rgba(220,38,38,0.08);}
 
-  .main-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start;}
+  .main-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
   .right-col{display:flex;flex-direction:column;gap:20px;}
 
-  .week-header-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:4px;}
-  .day-col{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-  .day-header{text-align:center;font-size:12px;font-weight:700;color:#6b7280;padding:6px 2px;background:#f3f4f6;border-radius:6px;}
+  /* רשת קשיחה של 7 עמודות המסתנכרנת בול במחשב */
+  .week-header-row{display:grid;grid-template-columns:repeat(7, 1fr);gap:10px;margin-bottom:10px;}
+  .day-col{display:grid;grid-template-columns:repeat(7, 1fr);gap:10px;}
+  .day-header{text-align:center;font-size:13px;font-weight:700;color:#6b7280;padding:8px 2px;background:#f3f4f6;border-radius:8px;}
   .day-header.weekend{color:#a78bfa;background:#fdf8ff;}
-  .day-header span{display:block;font-size:10px;font-weight:400;color:#9ca3af;margin-top:2px;}
+  .day-header span{display:block;font-size:11px;font-weight:400;color:#9ca3af;margin-top:2px;}
 
   @media screen and (max-width: 900px) {
     .main-layout {grid-template-columns: 1fr !important;}
     .week-header-row {display:none !important;}
-    .day-col {grid-template-columns: 1fr !important; gap: 10px !important;}
-    .day-slot {min-height: 90px !important; padding: 12px !important;}
+    .day-col {grid-template-columns: 1fr !important; gap: 12px !important;}
+    .day-slot {min-height: 95px !important; padding: 12px !important;}
     .day-slot::before {
       content: "יום " attr(data-dayname) " (" attr(data-daydate) "):";
       font-size: 13px !important;
@@ -63,12 +63,12 @@
   .btn-icon:hover{background:#f3f4f6;color:#374151;}
   .btn-icon.danger:hover{background:#fee2e2;color:#dc2626;}
   
-  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
-  .pill{border:1.5px solid transparent;border-radius:100px;padding:4px 12px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-  .pill.active{border-color:currentColor;background:rgba(0,0,0,0.03);}
+  /* אליפסות רחבות, עגולות ונקיות בבנק המשימות לפי התמונה */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .pill{border:1.5px solid transparent;border-radius:100px;padding:6px 16px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;}
+  .pill.active{border-color:currentColor;box-shadow:0 2px 6px rgba(0,0,0,0.04);transform:translateY(-1px);}
   .pill-all.active{background:#111827;color:#fff;}
   .pill-done.active{background:#6b7280;color:#fff;}
-  .pill-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
   
   .prog-wrap{height:4px;background:#f3f4f6;border-radius:100px;margin-bottom:16px;overflow:hidden;}
   .prog-bar{height:100%;background:#a78bfa;transition:width .4s;}
@@ -87,7 +87,6 @@
   .task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
   
   .cat-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:100px;border:1.5px solid currentColor;display:inline-flex;align-items:center;background:#fff;}
-  
   .duration-tag {font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;}
   .dur-short {background:#e0f2fe;color:#0369a1;}
   .dur-long {background:#f3e8ff;color:#6b21a8;}
@@ -95,7 +94,7 @@
   .prio-high{background:#fee2e2;color:#dc2626;}
   .task-note{font-size:11px;color:#6b7280;margin-top:3px;text-align:right;}
 
-  .day-slot{border-radius:12px;border:1.5px dashed #e5e7eb;background:#fafafa;min-height:110px;padding:6px;display:flex;flex-direction:column;gap:6px;transition:all .2s;}
+  .day-slot{border-radius:12px;border:1.5px dashed #e5e7eb;background:#fafafa;min-height:120px;padding:8px;display:flex;flex-direction:column;gap:6px;transition:all .2s;}
   .day-slot.weekend-slot{background:#fdf8ff;border-color:#e9d5ff;}
   .day-slot.drag-over{background:#f0f9ff;border-color:#7dd3fc;border-style:solid;}
   .day-slot-tasks {display:flex;flex-direction:column;gap:6px;width:100%;flex:1;}
@@ -123,16 +122,13 @@
   .opt-box:hover {border-color:#a78bfa;background:#fdf8ff;}
   .opt-title {font-weight:700;font-size:14px;color:#111827;margin-bottom:2px;}
 
-  .cat-list{display:flex;flex-direction:column;gap:6px;}
-  .cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.05);position:relative;}
-  .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .cat-name{font-size:12px;font-weight:500;flex:1;text-align:right;cursor:pointer;}
-  .cat-count{font-size:11px;margin-left:75px;font-weight:700;}
-  
-  .cat-item-actions {position:absolute;left:8px;display:flex;gap:6px;}
-  .cat-btn-text {background:none;border:none;font-size:11px;font-weight:500;cursor:pointer;color:#6b7280;padding:2px 4px;border-radius:4px;}
-  .cat-btn-text:hover {background:rgba(0,0,0,0.05);color:#111827;}
-  .cat-btn-text.danger:hover {background:#fee2e2;color:#dc2626;}
+  /* שורות קטגוריות רחבות ומעוגלות לפי התמונה האחרונה שלך */
+  .cat-list{display:flex;flex-direction:column;gap:8px;}
+  .cat-item{display:flex;align-items:center;padding:10px 16px;border-radius:100px;border:1.5px solid transparent;position:relative;height:44px;}
+  .cat-dot{width:8px;height:8px;border-radius:50%;margin-right:8px;margin-left:4px;flex-shrink:0;}
+  .cat-name{font-size:13px;font-weight:600;flex:1;text-align:right;cursor:pointer;}
+  .cat-count{font-size:13px;font-weight:600;margin-left:14px;}
+  .cat-item-actions {display:flex;align-items:center;}
   
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -154,18 +150,13 @@
     </button>
   </div>
 
-  <div id="persistentBanner" class="alert-banner">
-    <div class="alert-banner-content">
-      <span style="font-size:18px;">⚠️</span>
-      <div class="alert-banner-text" id="bannerText">המשימה היומית שלך ממתינה לביצוע.</div>
-    </div>
-  </div>
+  <div id="persistentBanner" class="alert-banner"></div>
 
   <div class="main-layout">
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">הלוז השבועי</div>
+          <div class="panel-title">הלוז השבועי המדויק</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;" id="weekLabel"></div>
         </div>
         <button class="btn-auto" onclick="openModal('chooseLevel')">
@@ -281,10 +272,10 @@ function getTodayKey() { return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'
 function exportData() {
   const packageStr = btoa(encodeURIComponent(JSON.stringify({cats, tasks, schedule})));
   navigator.clipboard.writeText(packageStr);
-  alert('קוד הסנכרון הועתק ללוח! 📤');
+  alert('קוד הסנכרון הועתק ללוח! 📤\nשלחי אותו לוואטסאפ והדביקי במכשיר השני.');
 }
 function importData() {
-  const code = prompt('הדביקי כאן את קוד הסנכרון:');
+  const code = prompt('הדביקי כאן את קוד הסנכרון שקיבלת:');
   if(!code) return;
   try {
     const parsed = JSON.parse(decodeURIComponent(atob(code)));
@@ -321,17 +312,15 @@ function updatePersistentLockBanner() {
   const banner = document.getElementById('persistentBanner');
   if (!banner) return;
   const todayKey = getTodayKey();
+  
   if (todayKey === 'sat') {
-    document.getElementById('bannerText').innerHTML = '📌 <strong>משימה לשבת:</strong> להכין לוז משימות ולוז חוויות ✨';
-    banner.style.display = 'flex';
+    banner.style.display = 'block';
     return;
   }
   const todayTaskIds = schedule[todayKey] || [];
   const activeTodayTasks = todayTaskIds.map(getTask).filter(t => t && !t.done);
   if (activeTodayTasks.length > 0) {
-    const titles = activeTodayTasks.map(t => t.title).join(', ');
-    document.getElementById('bannerText').innerHTML = '⚠️ <strong>ממתין ל-V היום:</strong> ' + esc(titles);
-    banner.style.display = 'flex';
+    banner.style.display = 'block';
   } else {
     banner.style.display = 'none';
   }
@@ -345,7 +334,7 @@ function requestNotificationPermission() {
   Notification.requestPermission().then(permission => {
     updateNotiButtonUI(permission);
     if(permission === 'granted') {
-      sendSystemNotification('התראות הופעלו בהצלחה! 🎉', 'המערכת תשלח תזכורות בשעות שבחרת.');
+      sendSystemNotification('התראות הופעלו בהצלחה! 🎉', 'המערכת תשלח תזכורות בזמנים המבוקשים.');
     }
   });
 }
@@ -367,26 +356,36 @@ function checkAlarmClock() {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
-  const currentDayIndex = now.getDay();
-  const todayStr = now.toDateString();
-  if (localStorage.getItem('last_noti_date') === todayStr) return;
+  const currentDayIndex = now.getDay(); 
+  const todayKey = getTodayKey();
+  const timeKey = currentHour + ':' + String(currentMinute).padStart(2, '0');
+  const cacheKey = todayKey + '_' + timeKey + '_' + now.getDate();
 
-  if (currentDayIndex === 6 && currentHour === 9 && currentMinute === 0) {
-    sendSystemNotification('📊 משימה לשבת', 'להכין לוז משימות ולוז חוויות ✨');
-    localStorage.setItem('last_noti_date', todayStr);
-    openModal('saturdayReport');
+  if (localStorage.getItem('last_triggered_alarm') === cacheKey) return;
+
+  // התראות יום שבת עם הכיתוב המבוקש והמדויק
+  if (currentDayIndex === 6) {
+    if (timeKey === '09:00') {
+      sendSystemNotification('יצירת לו"ז וחוויות שבועי', 'זמן לעבור על הדוח השבועי ותכנון המטרות בכיף ✨');
+      localStorage.setItem('last_triggered_alarm', cacheKey);
+      openModal('saturdayReport');
+    }
+    else if (timeKey === '16:30') {
+      sendSystemNotification('יצירת לו"ז וחוויות שבועי', 'תזכורת שנייה לשבת - בדיקה וסגירה של הלו"ז לשבוע הבא!');
+      localStorage.setItem('last_triggered_alarm', cacheKey);
+    }
   } 
-  else if (currentDayIndex !== 6 && currentHour === 7 && currentMinute === 0) {
-    const todayKey = getTodayKey();
+  // התראות ימי חול א'-ה' בשעה 7:00 בבוקר
+  else if (currentDayIndex >= 0 && currentDayIndex <= 4 && timeKey === '07:00') {
     const todayTasks = (schedule[todayKey] || []).map(getTask).filter(t => t && !t.done);
     if (todayTasks.length > 0) {
       const first = todayTasks[0];
       const details = first.note ? '\n📝 פרטים: ' + first.note : '';
       sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימות ממתינות לך.' + details);
     } else {
-      sendSystemNotification('📅 תזכורת בוקר', 'הלו"ז היומי פנוי, היכנסי לשבץ משימות בבנק!');
+      sendSystemNotification('📅 תזכורת בוקר', 'הלו"ז היומי פנוי, היכנסי לשבץ משימות מהבנק!');
     }
-    localStorage.setItem('last_noti_date', todayStr);
+    localStorage.setItem('last_triggered_alarm', cacheKey);
   }
 }
 
@@ -422,7 +421,7 @@ function renderWeek(){
         if(!t) return;
         const c = getCat(t.cat);
         const isShort = t.duration === 'short';
-        const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
+        const timeTagText = isShort ? '⚡ עד 5 דק\'' : '⏳ מעל 5 דק\'';
         
         cardsHtml += '<div class="sched-card ' + (t.done ? 'done' : '') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
             '<div style="display:flex;align-items:flex-start;gap:5px;">' +
@@ -465,46 +464,61 @@ function removeFromDay(dayKey, taskId){
 
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
-  weekdayKeys.forEach(k => { schedule[k] = []; });
+  const wDates = getWeekDates();
   
-  const freeTasks = tasks.filter(t => t && !t.done);
+  weekdayKeys.forEach(k => { schedule[k] = []; });
+  let freeTasks = tasks.filter(t => t && !t.done);
 
-  if(!freeTasks.length) {
+  freeTasks.forEach(t => {
+    if (t.due) {
+      DAYS.forEach(d => {
+        if (t.due === wDates[d.key+'_iso']) {
+          if (!schedule[d.key].includes(t.id)) {
+            schedule[d.key].push(t.id);
+          }
+        }
+      });
+    }
+  });
+
+  let remainingFree = freeTasks.filter(t => {
+    return !Object.values(schedule).some(dayArr => dayArr.includes(t.id));
+  });
+
+  if(!remainingFree.length && !freeTasks.length) {
     alert('אין משימות פנויות בבנק לשיבוץ אוטומטי! 📋');
     closeModal(); return;
   }
 
-  let urgent = freeTasks.filter(t => t.prio === 'high');
-  let nonUrgent = freeTasks.filter(t => t.prio !== 'high');
+  let urgent = remainingFree.filter(t => t.prio === 'high');
+  let nonUrgent = remainingFree.filter(t => t.prio !== 'high');
   
   let shortTasks = nonUrgent.filter(t => t.duration === 'short');
   let longTasks = nonUrgent.filter(t => t.duration !== 'short');
 
   weekdayKeys.forEach(k => {
-    let slotsAvailable = maxPerDay;
+    let currentCount = schedule[k].length;
+    let slotsAvailable = maxPerDay - currentCount;
 
     while (slotsAvailable > 0 && urgent.length > 0) {
       schedule[k].push(urgent.shift().id);
       slotsAvailable--;
     }
 
-    if (slotsAvailable >= 2) {
-      if (shortTasks.length > 0 && longTasks.length > 0) {
-        schedule[k].push(shortTasks.shift().id);
-        schedule[k].push(longTasks.shift().id);
-        slotsAvailable -= 2;
-      }
+    let hasShort = shortTasks.length > 0;
+    if (slotsAvailable >= 1 && hasShort) {
+      schedule[k].push(shortTasks.shift().id);
+      slotsAvailable--;
     }
 
-    while (slotsAvailable > 0 && (shortTasks.length > 0 || longTasks.length > 0)) {
-      if (shortTasks.length > 0) {
-        schedule[k].push(shortTasks.shift().id);
-        slotsAvailable--;
-      }
-      if (slotsAvailable > 0 && longTasks.length > 0) {
-        schedule[k].push(longTasks.shift().id);
-        slotsAvailable--;
-      }
+    while (slotsAvailable > 0 && longTasks.length > 0) {
+      schedule[k].push(longTasks.shift().id);
+      slotsAvailable--;
+    }
+    
+    while (slotsAvailable > 0 && shortTasks.length > 0) {
+      schedule[k].push(shortTasks.shift().id);
+      slotsAvailable--;
     }
   });
 
@@ -529,14 +543,17 @@ function dropOnDay(e,k){
 function renderPills(){
   const el=document.getElementById('catPills');
   if(!el) return;
-  let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')">הכל</span>';
+  
+  let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')" style="background:#f3f4f6;color:#111827;">הכל</span>';
+  
   cats.forEach(c=>{ 
     const isActive = filter === c.id;
-    h += '<span class="pill ' + (isActive ? 'active' : '') + '" style="color:' + c.text + ';border-color:' + c.text + '" onclick="setFilter(\'' + c.id + '\')">' +
-         '<span class="pill-dot" style="background:' + c.text + '"></span>' + c.name + '</span>'; 
+    h += '<span class="pill" style="background:' + c.color + ';color:' + c.text + ';border-color:' + (isActive ? c.text : 'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' +
+         esc(c.name) + '</span>'; 
   });
-  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')">✓ הושלם</span>';
-  el.innerHTML=h;
+  
+  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')" style="background:#e5e7eb;color:#4b5563;">✓ הושלם</span>';
+  el.innerHTML = h;
 }
 
 function renderTasks(){
@@ -595,20 +612,21 @@ function renderCatSidebar(){
   
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
     '<div class="cat-item" style="background:' + c.color + ';border-color:' + c.border + '">' +
-      '<div class="cat-dot" style="background:' + c.text + '"></div>' +
-      '<div class="cat-name" style="color:' + c.text + '" onclick="setFilter(\'' + c.id + '\')">' + esc(c.name) + '</div>' +
-      '<div class="cat-count" style="color:' + c.text + '">' + (counts[c.id] || 0) + '</div>' +
       '<div class="cat-item-actions">' +
-        '<button class="cat-btn-text" onclick="openModal(\'editCat\',\'' + c.id + '\')">ערוך</button>' +
-        '<button class="cat-btn-text danger" onclick="deleteCat(\'' + c.id + '\')">מחק</button>' +
+        '<button class="btn-icon" style="width:24px;height:24px;color:'+c.text+'" onclick="openModal(\'editCat\',\'' + c.id + '\')">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg>' +
+        '</button>' +
+        '<span class="cat-count" style="color:' + c.text + '">' + (counts[c.id] || 0) + '</span>' +
       '</div>' +
+      '<div class="cat-name" style="color:' + c.text + '; text-align:left; padding-left:10px;" onclick="setFilter(\'' + c.id + '\')">' + esc(c.name) + '</div>' +
+      '<div class="cat-dot" style="background:' + c.text + '"></div>' +
     '</div>').join('') + '</div>';
 }
 
 function deleteCat(catId) {
   if(confirm('האם את בטוחה שברצונך למחוק קטגוריה זו? המשימות המשויכות אליה לא יימחקו.')) {
     cats = cats.filter(c => c.id !== catId);
-    save(); render();
+    save(); render(); closeModal();
   }
 }
 
@@ -697,20 +715,26 @@ function openModal(type,id){
     const c = type === 'editCat' ? cats.find(curr => curr.id === id) : null;
     editCatId = c ? c.id : null;
     
+    const deleteButtonHtml = c ? '<button class="btn-primary" style="background:#dc2626;margin-left:auto;" onclick="deleteCat(\'' + c.id + '\')">מחק קטגוריה</button>' : '';
+    
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
         '<div class="modal-title">' + (c ? '✏️ עריכת קטגוריה' : '🏷️ קטגוריה חדשה') + '</div>' +
         '<div class="form-group"><label class="form-label">שם הקטגוריה *</label><input id="c_name" class="form-input" type="text" placeholder="לדוגמה: סידורים" value="' + (c ? esc(c.name) : '') + '"></div>' +
         '<div class="form-group"><label class="form-label">צבע רקע</label><input id="c_color" type="color" class="form-input" style="height:40px;padding:2px;" value="' + (c ? c.color : '#e8f4fd') + '"></div>' +
-        '<div class="modal-actions"><button class="btn-ghost" onclick="closeModal()">ביטול</button><button class="btn-primary" onclick="saveCat()">' + (c ? 'שמור שינויים' : 'הוסף') + '</button></div>' +
+        '<div class="modal-actions">' +
+          deleteButtonHtml +
+          '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
+          '<button class="btn-primary" onclick="saveCat()">' + (c ? 'שמור' : 'הוסף') + '</button>' +
+        '</div>' +
       '</div></div>';
   }
   else if(type==='saturdayReport'){
     mc.innerHTML='<div class="modal-overlay" onclick="closeBg(event)">' +
       '<div class="modal">' +
-        '<div class="modal-title">משימה לשבת: לו"ז משימות ולו"ז חוויות</div>' +
-        '<p style="font-size:13px;color:#4b5563;line-height:1.5;">הגיע הזמן לעצור, לקחת נשימה ולתכנן את השבוע הבא בכיף וברוגע!</p>' +
-        '<div class="modal-actions"><button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal()">הבנתי, שבוע מדהים בפתח!</button></div>' +
+        '<div class="modal-title">📊 יצירת לו"ז וחוויות שבועי</div>' +
+        '<p style="font-size:13px;color:#4b5563;line-height:1.5;">הגיע הזמן לעצור, לקחת נשימה ולתכנן את לו"ז המשימות ולו"ז החוויות לשבוע הבא בכיף וברוגע!</p>' +
+        '<div class="modal-actions"><button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal()">הבנתי, שבוע מדהים בפתח! ✨</button></div>' +
       '</div></div>';
   }
 }
