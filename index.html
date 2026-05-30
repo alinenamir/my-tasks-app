@@ -125,6 +125,10 @@
   .cat-name{font-size:15px;font-weight:600;text-align:right;}
   .cat-left-side{display:flex;align-items:center;gap:8px;color:inherit;opacity:0.8;}
   .cat-count{font-size:14px;font-weight:600;}
+  
+  .color-grid-picker {display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;margin-top:6px;}
+  .color-opt-btn {border:1.5px solid #e5e7eb;border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;background:#fff;transition:all 0.15s;}
+  .color-opt-btn.selected {border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,0.05);transform:scale(1.02);}
    
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -234,6 +238,7 @@ DAYS.forEach(d => { if(!Array.isArray(schedule[d.key])) schedule[d.key] = []; })
 let filter='all';
 let editId=null;
 let editCatId=null;
+let selectedCatColor = DC[0].color;
 
 function getWeekDates() {
   const now = new Date();
@@ -267,7 +272,7 @@ function getTodayKey() { return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'
 function exportData() {
   const packageStr = btoa(encodeURIComponent(JSON.stringify({cats, tasks, schedule})));
   navigator.clipboard.writeText(packageStr);
-  alert('קוד הסנכרון הועתק ללוח! 📤\nשלחי אותו לוואטסאפ והדביקי במכשיר השני.');
+  alert('קוד הועתק ללוח');
 }
 function importData() {
   const code = prompt('הדביקי כאן את קוד הסנכרון שקיבלת:');
@@ -304,25 +309,20 @@ function autoAssignTasksByDate() {
 }
 
 function requestNotificationPermission() {
-  if (!('Notification' in window)) {
-    // הרשמה ל-Service Worker כדי לאפשר התראות ב-PWA על מסך הבית ב-iOS ובאנדרואיד
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      navigator.serviceWorker.register('data:text/javascript,//sw').then(reg => {
-        if (reg.showNotification) {
-          // מנגנון חלופי ל-PWA
-          alert('התראות נתמכות. עלייך לאשר את דרישת המערכת הבאה לחלון קופץ.');
-        }
-      });
-    }
-    alert('אנא ודאי שאישרת התראות בהגדרות המכשיר עבור אפליקציה זו במסך הבית.');
-    return;
+  if ('Notification' in window) {
+    Notification.requestPermission().then(permission => {
+      updateNotiButtonUI(permission);
+      if(permission === 'granted') {
+        sendSystemNotification('התראות הופעלו בהצלחה! 🎉', 'המערכת תשלח תזכורות בזמנים המבוקשים.');
+      }
+    });
+  } else if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('data:text/javascript,//sw').then(reg => {
+      if (reg.showNotification) {
+        updateNotiButtonUI('granted');
+      }
+    });
   }
-  Notification.requestPermission().then(permission => {
-    updateNotiButtonUI(permission);
-    if(permission === 'granted') {
-      sendSystemNotification('התראות הופעלו בהצלחה! 🎉', 'המערכת תשלח תזכורות בזמנים המבוקשים.');
-    }
-  });
 }
 
 function updateNotiButtonUI(status) {
@@ -333,12 +333,22 @@ function updateNotiButtonUI(status) {
 }
 
 function sendSystemNotification(title, body) {
+  const options = {
+    body: body,
+    requireInteraction: true,
+    data: { note: body }
+  };
+  
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, { body: body, requireInteraction: true });
+    const n = new Notification(title, options);
+    n.onclick = function(e) {
+      e.preventDefault();
+      window.focus();
+      alert(title + '\n' + (this.data?.note || ''));
+    };
   } else if ('serviceWorker' in navigator) {
-    // תמיכה רחבה יותר עבור מכשירים במסך הבית (PWA)
     navigator.serviceWorker.ready.then(registration => {
-      registration.showNotification(title, { body: body, requireInteraction: true });
+      registration.showNotification(title, options);
     });
   }
 }
@@ -564,23 +574,23 @@ function renderTasks(){
     const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
     const dateStr = t.due ? t.due.split('-').reverse().join('/') : '';
      
-    return '<div class="task-card fade-in ' + (t.done ? 'done' : '') + '" style="border-color:' + c.border + '; background:linear-gradient(135deg, #fff, ' + c.color + '22)" ' +
+    return '<div class="task-card fade-in ' + (t.done ? 'done' : '') + '" style="border-color:' + c.border + '; background:' + c.color + '" ' +
       'draggable="true" ondragstart="event.dataTransfer.setData(\'taskId\',\'' + t.id + '\')">' +
       '<div class="task-check ' + (t.done ? 'checked' : '') + '" onclick="toggleTask(\'' + t.id + '\')">' +
         '<span class="chk-mark" style="color:' + c.text + '">✓</span>' +
       '</div>' +
       '<div class="task-content">' +
         '<div class="task-title" style="color:' + c.text + '">' + esc(t.title) + '</div>' +
-        (t.note ? '<div class="task-note">' + esc(t.note) + '</div>' : '') +
+        (t.note ? '<div class="task-note" style="color:' + c.text + '; opacity:0.8;">' + esc(t.note) + '</div>' : '') +
         '<div class="task-meta">' +
           '<span class="cat-badge" style="color:' + c.text + ';border-color:' + c.text + '">' + c.name + '</span>' +
           '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
           (t.prio === 'high' ? '<span class="prio-tag prio-high">🔥 גבוהה</span>' : '') +
-          (t.due ? '<span style="font-size:10px;color:#9ca3af;">📅 ' + dateStr + '</span>' : '') +
+          (t.due ? '<span style="font-size:10px;color:' + c.text + '; opacity:0.8;">📅 ' + dateStr + '</span>' : '') +
         '</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">' +
-        '<button class="btn-icon" onclick="openModal(\'edit\',\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>' +
+        '<button class="btn-icon" style="color:' + c.text + '" onclick="openModal(\'edit\',\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg></button>' +
         '<button class="btn-icon danger" onclick="deleteTask(\'' + t.id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>' +
       '</div>' +
     '</div>';
@@ -621,6 +631,16 @@ function deleteCat(catId) {
     cats = cats.filter(c => c.id !== catId);
     save(); render(); closeModal();
   }
+}
+
+function selectColorInForm(colorCode) {
+  selectedCatColor = colorCode;
+  document.querySelectorAll('.color-opt-btn').forEach(btn => {
+    btn.classList.remove('selected');
+    if(btn.getAttribute('data-color') === colorCode) {
+      btn.classList.add('selected');
+    }
+  });
 }
 
 function render(){renderPills();renderTasks();renderProgress();renderCatSidebar();renderWeek();}
@@ -675,7 +695,7 @@ function assignTaskFromBank(dayKey, taskId) {
 
 function saveCatForm() {
   const name = document.getElementById('catFormName').value.trim();
-  const color = document.getElementById('catFormColor').value;
+  const color = selectedCatColor;
 
   if(!name) { alert('אנא הזן שם לקטגוריה'); return; }
 
@@ -785,7 +805,12 @@ function openModal(type,id){
   }
   else if(type==='cat'||type==='editCat') {
     const c = type==='editCat'?cats.find(x=>x.id===id):null; editCatId=c?c.id:null;
-    const colorOpts = DC.map(d => '<option value="' + d.color + '" ' + (c&&c.color===d.color?'selected':'') + '>' + d.name + '</option>').join('');
+    selectedCatColor = c ? c.color : DC[0].color;
+    
+    let colorPickersHtml = DC.map(d => {
+      const isSel = selectedCatColor === d.color ? 'selected' : '';
+      return '<div class="color-opt-btn ' + isSel + '" data-color="' + d.color + '" style="background:' + d.color + '; color:' + d.text + ';" onclick="selectColorInForm(\'' + d.color + '\')">' + d.name + '</div>';
+    }).join('');
 
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in">' +
@@ -795,8 +820,8 @@ function openModal(type,id){
           '<input type="text" id="catFormName" class="form-input" value="' + (c?esc(c.name):'') + '" placeholder="לדוגמה: סידורים, פנאי...">' +
         '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">צבע</label>' +
-          '<select id="catFormColor" class="form-input">' + colorOpts + '</select>' +
+          '<label class="form-label">בחרי צבע</label>' +
+          '<div class="color-grid-picker">' + colorPickersHtml + '</div>' +
         '</div>' +
         '<div class="modal-actions" style="justify-content: ' + (editCatId?'space-between':'flex-end') + ';">' +
           (editCatId?'<button class="btn-ghost" style="color:#dc2626;border-color:#fee2e2;" onclick="deleteCat(\''+c.id+'\')">מחק קטגוריה</button>':'') +
