@@ -25,7 +25,6 @@
   .main-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
   .right-col{display:flex;flex-direction:column;gap:20px;}
 
-  /* רשת קשיחה מיושרת היטב שמסדרת את עמודת שבת בצורה מושלמת במחשב */
   .week-header-row{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:10px;margin-bottom:10px;width:100%;}
   .day-col{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:10px;width:100%;}
   .day-header{text-align:center;font-size:13px;font-weight:700;color:#6b7280;padding:8px 2px;background:#f3f4f6;border-radius:8px;}
@@ -119,7 +118,6 @@
   .opt-box:hover {border-color:#a78bfa;background:#fdf8ff;}
   .opt-title {font-weight:700;font-size:14px;color:#111827;margin-bottom:2px;}
 
-  /* עיצוב משופר לקטגוריות בהתאם לתמונה image_3d843d.png */
   .cat-list{display:flex;flex-direction:column;gap:10px;}
   .cat-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:14px;border:1px solid transparent;height:auto;min-height:46px;direction:rtl;}
   .cat-right-side{display:flex;align-items:center;gap:10px;cursor:pointer;}
@@ -153,7 +151,7 @@
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">הלוז השבועי המדויק</div>
+          <div class="panel-title">הלוז השבועי</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;" id="weekLabel"></div>
         </div>
         <button class="btn-auto" onclick="openModal('chooseLevel')">
@@ -187,7 +185,7 @@
       </div>
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">🏷️ קטגוריות</div>
+          <div class="panel-title">קטגוריות</div>
           <button class="btn-ghost" onclick="openModal('cat')" style="font-size:12px;padding:5px 10px;">+ הוסף</button>
         </div>
         <div class="panel-body" id="catSidebar" style="padding-top:10px;"></div>
@@ -307,7 +305,16 @@ function autoAssignTasksByDate() {
 
 function requestNotificationPermission() {
   if (!('Notification' in window)) {
-    alert('באייפון יש ללחוץ על כפתור השיתוף בספארי, לבחור הוסף למסך הבית, ולפתוח משם כדי לאפשר התראות.');
+    // הרשמה ל-Service Worker כדי לאפשר התראות ב-PWA על מסך הבית ב-iOS ובאנדרואיד
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.register('data:text/javascript,//sw').then(reg => {
+        if (reg.showNotification) {
+          // מנגנון חלופי ל-PWA
+          alert('התראות נתמכות. עלייך לאשר את דרישת המערכת הבאה לחלון קופץ.');
+        }
+      });
+    }
+    alert('אנא ודאי שאישרת התראות בהגדרות המכשיר עבור אפליקציה זו במסך הבית.');
     return;
   }
   Notification.requestPermission().then(permission => {
@@ -328,14 +335,15 @@ function updateNotiButtonUI(status) {
 function sendSystemNotification(title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
     new Notification(title, { body: body, requireInteraction: true });
+  } else if ('serviceWorker' in navigator) {
+    // תמיכה רחבה יותר עבור מכשירים במסך הבית (PWA)
+    navigator.serviceWorker.ready.then(registration => {
+      registration.showNotification(title, { body: body, requireInteraction: true });
+    });
   }
 }
 
 function triggerImmediateTestNotification() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    alert('אנא הפעילי תחילה את ההתראות במכשיר באמצעות הכפתור הירוק שמעליי.');
-    return;
-  }
   sendSystemNotification('📱 בדיקת התראות מושחזת!', 'הודעת בדיקה עובדת מצוין בטלפון שלך. הכל מוכן!');
 }
 
@@ -484,25 +492,21 @@ function generateScheduleWithLevel(maxPerDay) {
     let currentCount = schedule[k].length;
     let slotsAvailable = maxPerDay - currentCount;
 
-    // 1. שיבוץ משימות דחופות קודם כל
     while (slotsAvailable > 0 && urgent.length > 0) {
       schedule[k].push(urgent.shift().id);
       slotsAvailable--;
     }
 
-    // 2. הגבלה קשיחה: תמיד משימה אחת בדיוק של פחות מ-5 דקות ליום
     if (slotsAvailable >= 1 && shortTasks.length > 0) {
       schedule[k].push(shortTasks.shift().id);
       slotsAvailable--;
     }
 
-    // 3. מילוי שאר היום במשימות ארוכות (רגילות)
     while (slotsAvailable > 0 && longTasks.length > 0) {
       schedule[k].push(longTasks.shift().id);
       slotsAvailable--;
     }
      
-    // 4. פריסת משימות: אם אין ברירה ואין מספיק משימות ארוכות, מתייחסים לקצרות כרגיל ומשתמשים בהן למילוי
     while (slotsAvailable > 0 && shortTasks.length > 0) {
       schedule[k].push(shortTasks.shift().id);
       slotsAvailable--;
@@ -539,7 +543,7 @@ function renderPills(){
          esc(c.name) + '</span>'; 
   });
    
-  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')" style="background:#e5e7eb;color:#4b5563;">✓ הושלם</span>';
+  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')" style="background:#e5e5e5;color:#4b5563;">✓ הושלם</span>';
   el.innerHTML = h;
 }
 
@@ -597,15 +601,12 @@ function renderCatSidebar(){
   if(!el) return;
   const counts={}; tasks.forEach(t=>{ if(t && !t.done) counts[t.cat]=(counts[t.cat]||0)+1; });
   
-  // רינדור מחודש של מבנה הקטגוריות שיתאים במדויק לצילום המסך (image_3d843d.png)
   el.innerHTML='<div class="cat-list">' + cats.map(c=>
     '<div class="cat-item" style="background:' + c.color + '; border-color:' + c.border + '; color:' + c.text + ';">' +
-      /* חלק ימני: נקודה ושם קטגוריה */
       '<div class="cat-right-side" onclick="setFilter(\'' + c.id + '\')">' +
         '<div class="cat-dot" style="background:' + c.text + '"></div>' +
         '<div class="cat-name">' + esc(c.name) + '</div>' +
-      '"</div>' +
-      /* חלק שמאלי: כפתור עריכה קטן (עיפרון) ומונה משימות צמוד */
+      '</div>' +
       '<div class="cat-left-side">' +
         '<button class="btn-icon" style="width:20px; height:20px; color:inherit; display:inline-flex; align-items:center;" onclick="openModal(\'editCat\',\'' + c.id + '\')">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg>' +
@@ -648,7 +649,6 @@ function saveTaskForm() {
   const prio = document.getElementById('formPrio').value;
   const due = document.getElementById('formDue').value;
   const note = document.getElementById('formNote').value.trim();
-  const daySched = document.getElementById('formDaySched').value;
 
   if(!title) { alert('אנא הזן כותרת למשימה'); return; }
 
@@ -656,28 +656,33 @@ function saveTaskForm() {
     const t = getTask(editId);
     if(t) {
       t.title = title; t.cat = cat; t.duration = duration; t.prio = prio; t.due = due; t.note = note;
-      if(daySched) {
-        DAYS.forEach(d => { schedule[d.key] = (schedule[d.key]||[]).filter(id => id !== editId); });
-        if(daySched !== 'none') schedule[daySched].push(editId);
-      }
     }
   } else {
     const newId = uid();
     tasks.push({ id: newId, title, cat, duration, prio, due, note, done: false });
-    if(daySched && daySched !== 'none') {
-      schedule[daySched].push(newId);
-    }
   }
   save(); render(); closeModal();
+}
+
+function assignTaskFromBank(dayKey, taskId) {
+  if(!schedule[dayKey]) schedule[dayKey] = [];
+  if(!schedule[dayKey].includes(taskId)) {
+    DAYS.forEach(d => { schedule[d.key] = (schedule[d.key]||[]).filter(id => id !== taskId); });
+    schedule[dayKey].push(taskId);
+    save(); renderWeek(); closeModal();
+  }
 }
 
 function saveCatForm() {
   const name = document.getElementById('catFormName').value.trim();
   const color = document.getElementById('catFormColor').value;
-  const text = document.getElementById('catFormText').value;
-  const border = document.getElementById('catFormBorder').value;
 
   if(!name) { alert('אנא הזן שם לקטגוריה'); return; }
+
+  let text = '#111827';
+  let border = '#e5e7eb';
+  const matched = DC.find(d => d.color === color);
+  if (matched) { text = matched.text; border = matched.border; }
 
   if(editCatId) {
     const c = cats.find(x => x.id === editCatId);
@@ -693,18 +698,8 @@ function openModal(type,id){
   if(!mc) return;
 
   if(type==='add'||type==='edit'){
-    const t=id?getTask(id):null; editId=id||null;
+    const t=id && type==='edit'?getTask(id):null; editId=t?id:null;
     const catOpts=cats.map(c=>'<option value="' + c.id + '" ' + (t&&t.cat===c.id?'selected':'') + '>' + c.name + '</option>').join('');
-    
-    let currentDay = 'none';
-    if(editId) {
-      DAYS.forEach(d => { if((schedule[d.key]||[]).includes(editId)) currentDay = d.key; });
-    } else if(id && DAYS.some(d => d.key === id)) {
-      currentDay = id;
-    }
-
-    const dayOpts = '<option value="none">בנק המשימות בלבד</option>' + 
-      DAYS.map(d => '<option value="' + d.key + '" ' + (currentDay===d.key?'selected':'') + '>יום ' + d.full + '</option>').join('');
 
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in">' +
@@ -726,18 +721,12 @@ function openModal(type,id){
             '</select>' +
           '</div>' +
         '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group" style="flex:1;">' +
-            '<label class="form-label">עדיפות</label>' +
-            '<select id="formPrio" class="form-input">' +
-              '<option value="normal" ' + (t&&t.prio==='normal'?'selected':'') + '>רגילה</option>' +
-              '<option value="high" ' + (t&&t.prio==='high'?'selected':'') + '>גבוהה 🔥</option>' +
-            '</select>' +
-          '</div>' +
-          '<div class="form-group" style="flex:1;">' +
-            '<label class="form-label">שובץ ליום</label>' +
-            '<select id="formDaySched" class="form-input">' + dayOpts + '</select>' +
-          '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">עדיפות</label>' +
+          '<select id="formPrio" class="form-input">' +
+            '<option value="normal" ' + (t&&t.prio==='normal'?'selected':'') + '>רגילה</option>' +
+            '<option value="high" ' + (t&&t.prio==='high'?'selected':'') + '>גבוהה 🔥</option>' +
+          '</select>' +
         '</div>' +
         '<div class="form-group">' +
           '<label class="form-label">תאריך יעד ספציפי (אופציונלי)</label>' +
@@ -755,24 +744,38 @@ function openModal(type,id){
     '</div>';
   }
   else if(type==='addDay') {
-    openModal('add', id);
+    const freeTasks = tasks.filter(t => t && !t.done);
+    let bankOpts = freeTasks.map(t => '<option value="' + t.id + '">' + esc(t.title) + '</option>').join('');
+    
+    if(!freeTasks.length) {
+      bankOpts = '<option value="">אין משימות פנויות בבנק</option>';
+    }
+
+    mc.innerHTML = '<div class="modal-overlay">' +
+      '<div class="modal fade-in">' +
+        '<div class="modal-title">הוספת משימה ליום ' + (DAYS.find(d=>d.key===id)?.full || '') + '</div>' +
+        '<div class="form-group">' +
+          '<label class="form-label">בחרי משימה מתוך הבנק</label>' +
+          '<select id="bankTaskSelect" class="form-input">' + bankOpts + '</select>' +
+        '</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
+          '<button class="btn-primary" onclick="if(document.getElementById(\'bankTaskSelect\').value) assignTaskFromBank(\'' + id + '\', document.getElementById(\'bankTaskSelect\').value)">הוסף ללו"ז</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }
   else if(type==='chooseLevel') {
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in" style="max-width:360px;">' +
-        '<div class="modal-title">בחרי רמת עומס שבועית ⚡</div>' +
-        '<div style="font-size:12px;color:#6b7280;margin-bottom:16px;text-align:right;">המערכת תשבץ משימות פנויות באופן מאוזן ויעיל למשך חמשת ימי העבודה (א\'-ה\').</div>' +
-        '<div class="opt-box" onclick="generateScheduleWithLevel(2)">' +
-          '<div class="opt-title">🧘 רגוע וקליל</div>' +
-          '<div style="font-size:12px;color:#6b7280;">עד 2 משימות ביום (כולל משימה אחת קצרה של פחות מ-5 דק\').</div>' +
+        '<div class="opt-box" onclick="generateScheduleWithLevel(1)">' +
+          '<div class="opt-title">בסיסי- משימה אחת ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
-          '<div class="opt-title">🚀 ממוקד ואפקטיבי</div>' +
-          '<div style="font-size:12px;color:#6b7280;">עד 3 משימות ביום (כולל משימה אחת קצרה של פחות מ-5 דק\').</div>' +
+          '<div class="opt-title">מתקדם - עד 3 משימות ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
-          '<div class="opt-title">🔥 עומס גבוה (טורבו)</div>' +
-          '<div style="font-size:12px;color:#6b7280;">עד 5 משימות ביום, הספק מקסימלי לביצוע מהיר.</div>' +
+          '<div class="opt-title">שגרה מלאה- עד 5 משימות ביום</div>' +
         '</div>' +
         '<div class="modal-actions" style="margin-top:12px;">' +
           '<button class="btn-ghost" onclick="closeModal()">סגור</button>' +
@@ -782,6 +785,8 @@ function openModal(type,id){
   }
   else if(type==='cat'||type==='editCat') {
     const c = type==='editCat'?cats.find(x=>x.id===id):null; editCatId=c?c.id:null;
+    const colorOpts = DC.map(d => '<option value="' + d.color + '" ' + (c&&c.color===d.color?'selected':'') + '>' + d.name + '</option>').join('');
+
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in">' +
         '<div class="modal-title">' + (editCatId?'עריכת קטגוריה':'הוספת קטגוריה חדשה') + '</div>' +
@@ -789,19 +794,9 @@ function openModal(type,id){
           '<label class="form-label">שם הקטגוריה</label>' +
           '<input type="text" id="catFormName" class="form-input" value="' + (c?esc(c.name):'') + '" placeholder="לדוגמה: סידורים, פנאי...">' +
         '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group" style="flex:1;">' +
-            '<label class="form-label">צבע רקע (Hex)</label>' +
-            '<input type="text" id="catFormColor" class="form-input" value="' + (c?c.color:'#f3f4f6') + '">' +
-          '</div>' +
-          '<div class="form-group" style="flex:1;">' +
-            '<label class="form-label">צבע טקסט (Hex)</label>' +
-            '<input type="text" id="catFormText" class="form-input" value="' + (c?c.text:'#111827') + '">' +
-          '</div>' +
-        '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">צבע מסגרת (Hex)</label>' +
-          '<input type="text" id="catFormBorder" class="form-input" value="' + (c?c.border:'#e5e7eb') + '">' +
+          '<label class="form-label">צבע</label>' +
+          '<select id="catFormColor" class="form-input">' + colorOpts + '</select>' +
         '</div>' +
         '<div class="modal-actions" style="justify-content: ' + (editCatId?'space-between':'flex-end') + ';">' +
           (editCatId?'<button class="btn-ghost" style="color:#dc2626;border-color:#fee2e2;" onclick="deleteCat(\''+c.id+'\')">מחק קטגוריה</button>':'') +
@@ -839,11 +834,10 @@ function openModal(type,id){
   }
 }
 
-// הרצה ראשונית וטעינת הנתונים
 window.addEventListener('DOMContentLoaded', () => {
   render();
   updateNotiButtonUI();
-  setInterval(checkAlarmClock, 20000); // בדיקה רצה כל 20 שניות ברקע
+  setInterval(checkAlarmClock, 20000);
 });
 </script>
 </body>
