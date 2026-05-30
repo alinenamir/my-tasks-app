@@ -127,9 +127,15 @@
   .cat-count{font-size:14px;font-weight:600;}
   
   .color-grid-picker {display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-top:6px;}
-  .color-opt-btn {border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
+  .color-opt-btn {border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 4px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
   .color-opt-btn.selected {border-color:#111827 !important;box-shadow:0 0 0 2.5px rgba(0,0,0,0.15);transform:scale(1.04);}
    
+  /* התראה צפה מעוצבת למובייל לעקיפת חסימות דפדפן */
+  .toast-alert {position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:#111827;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 10px 3px rgba(0,0,0,0.1);z-index:9999;width:calc(100% - 32px);max-width:380px;direction:rtl;transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);cursor:pointer;}
+  .toast-alert.show {transform:translateX(-50%) translateY(0);}
+  .toast-title {font-weight:700;font-size:14px;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+  .toast-body {font-size:12.5px;color:#d1d5db;line-height:1.4;}
+
   .fade-in{animation:fi .2s ease forwards;}
   @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
   </style>
@@ -190,7 +196,7 @@
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">קטגוריות</div>
-          <button class="btn-ghost" onclick="openModal('cat')" style="font-size:12px;padding:5px 10px;">+ הוסף</button>
+          <button class="btn-ghost" onclick="openModal('cat')" style="font-size:12px;padding:5px 10px;">+ הוסף קטגוריה</button>
         </div>
         <div class="panel-body" id="catSidebar" style="padding-top:10px;"></div>
       </div>
@@ -203,29 +209,14 @@
   </div>
 </div>
 
+<div id="toastAlert" class="toast-alert" onclick="this.classList.remove('show')">
+  <div class="toast-title">🔔 תזכורת משימה</div>
+  <div class="toast-body" id="toastBody"></div>
+</div>
+
 <div id="modalContainer"></div>
 
 <script>
-// רישום סרוויס וורקר משופר וחזק יותר לעקיפת הגדרות אבטחה של דפדפני מובייל
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    self.addEventListener('notificationclick', function(e) {
-      e.notification.close();
-      e.waitUntil(
-        clients.matchAll({type: 'window'}).then(function(clientList) {
-          for (var i = 0; i < clientList.length; i++) {
-            var client = clientList[i];
-            if (client.url == '/' && 'focus' in client) return client.focus();
-          }
-          if (clients.openWindow) return clients.openWindow('/');
-        })
-      );
-    });
-  `;
-  const blob = new Blob([swCode], {type: 'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(e => console.log('SW registration skipped'));
-}
-
 const DAYS=[
   {key:'sun',label:'א׳',full:'ראשון',weekend:false,index:0},
   {key:'mon',label:'ב׳',full:'שני',weekend:false,index:1},
@@ -236,7 +227,6 @@ const DAYS=[
   {key:'sat',label:'שבת',full:'שבת',weekend:true,index:6}
 ];
 
-// מאגר צבעים עשיר וייחודי לבחירה חופשית לחלוטין עבור קטגוריות חדשות
 const CUSTOM_COLORS_PALETTE = [
   {color:'#fce7f3',text:'#9d174d',border:'#f9a8d4',name:'ורוד פסטל'},
   {color:'#dcfce7',text:'#166534',border:'#86efac',name:'ירוק מרענן'},
@@ -248,45 +238,43 @@ const CUSTOM_COLORS_PALETTE = [
   {color:'#e2e8f0',text:'#334155',border:'#cbd5e1',name:'אפור אלגנט'}
 ];
 
-let cats=JSON.parse(localStorage.getItem('mish_cats')) || [...CUSTOM_COLORS_PALETTE.slice(0,6).map((c,i)=>({id:'cat_'+i, name:['חוויות','לימודים ועתיד','בריאות ואישי','עבודה','כספים','קשרים חברתיים'][i], color:c.color, text:c.text, border:c.border}))];
-if(!localStorage.getItem('mish_cats')) { localStorage.setItem('mish_cats', JSON.stringify(cats)); }
+// פתרון טעינה בטוח למניעת התרסקויות בטלפון
+let cats = [];
+let tasks = [];
+let schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
 
-let tasks=JSON.parse(localStorage.getItem('mish_tasks')||'[]');
-let schedule=JSON.parse(localStorage.getItem('mish_sched_multi')||'{"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]}');
-
-if (typeof schedule !== 'object' || Array.isArray(schedule)) {
-  schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
-}
-DAYS.forEach(d => { if(!Array.isArray(schedule[d.key])) schedule[d.key] = []; });
-
-let filter='all';
-let editId=null;
-let editCatId=null;
-let selectedCatColor = CUSTOM_COLORS_PALETTE[0].color;
-
-function getWeekDates() {
-  const now = new Date();
-  const currentDay = now.getDay();
-  const startOfWeek = new Date(now.getTime());
-  startOfWeek.setDate(now.getDate() - currentDay);
-
-  let dates = {};
-  DAYS.forEach(d => {
-    let target = new Date(startOfWeek.getTime());
-    target.setDate(startOfWeek.getDate() + d.index);
-    let day = String(target.getDate()).padStart(2, '0');
-    let month = String(target.getMonth() + 1).padStart(2, '0');
-    dates[d.key] = day + '/' + month;
-    dates[d.key+'_iso'] = target.getFullYear() + '-' + month + '-' + day;
-  });
-  return dates;
+function loadStorageSafely() {
+  try {
+    const savedCats = localStorage.getItem('mish_cats');
+    cats = savedCats ? JSON.parse(savedCats) : [...CUSTOM_COLORS_PALETTE.slice(0,5).map((c,i)=>({id:'cat_'+i, name:['חוויות','לימודים ועתיד','בריאות ואישי','עבודה','כספים'][i], color:c.color, text:c.text, border:c.border}))];
+    
+    const savedTasks = localStorage.getItem('mish_tasks');
+    tasks = savedTasks ? JSON.parse(savedTasks) : [];
+    
+    const savedSched = localStorage.getItem('mish_sched_multi');
+    if (savedSched) {
+      const parsed = JSON.parse(savedSched);
+      if (typeof parsed === 'object' && !Array.isArray(parsed)) schedule = parsed;
+    }
+    DAYS.forEach(d => { if(!Array.isArray(schedule[d.key])) schedule[d.key] = []; });
+  } catch (e) {
+    // מנגנון הגנה למובייל במקרה ש-localStorage חסום לחלוטין
+    cats = [...CUSTOM_COLORS_PALETTE.slice(0,3).map((c,i)=>({id:'cat_'+i, name:['משימות אישיות','עבודה ולימודים','פנאי'][i], color:c.color, text:c.text, border:c.border}))];
+    tasks = [];
+    schedule = {"sun":[],"mon":[],"tue":[],"wed":[],"thu":[],"fri":[],"sat":[]};
+  }
 }
 
 function save(){
-  localStorage.setItem('mish_cats',JSON.stringify(cats));
-  localStorage.setItem('mish_tasks',JSON.stringify(tasks));
-  localStorage.setItem('mish_sched_multi',JSON.stringify(schedule));
+  try {
+    localStorage.setItem('mish_cats',JSON.stringify(cats));
+    localStorage.setItem('mish_tasks',JSON.stringify(tasks));
+    localStorage.setItem('mish_sched_multi',JSON.stringify(schedule));
+  } catch(e) {
+    console.log('Storage save write restricted');
+  }
 }
+
 function getCat(id){return cats.find(c=>c.id===id)||{name:'📊',color:'#f3f4f6',text:'#374151',border:'#d1d5db'};}
 function uid(){return Math.random().toString(36).slice(2,10);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -296,7 +284,7 @@ function getTodayKey() { return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'
 function exportData() {
   const packageStr = btoa(encodeURIComponent(JSON.stringify({cats, tasks, schedule})));
   navigator.clipboard.writeText(packageStr);
-  alert('קוד הועתק ללוח');
+  alert('קוד סנכרון הועתק ללוח בהצלחה!');
 }
 function importData() {
   const code = prompt('הדביקי כאן את קוד הסנכרון שקיבלת:');
@@ -333,50 +321,35 @@ function autoAssignTasksByDate() {
 }
 
 function requestNotificationPermission() {
-  if ('Notification' in window) {
-    Notification.requestPermission().then(permission => {
-      updateNotiButtonUI(permission);
-    }).catch(() => {
-      // במקרה של דפדפנים שחוסמים הפעלה ישירה ללא HTTPS
-      updateNotiButtonUI('granted');
-    });
-  } else {
-    updateNotiButtonUI('granted');
-  }
-}
-
-function updateNotiButtonUI(status) {
   const btn = document.getElementById('btnToggleNoti');
   const text = document.getElementById('notiBtnText');
-  const currentStatus = status || ( 'Notification' in window ? Notification.permission : 'granted' );
-  if (btn && text) { btn.classList.add('active'); text.textContent = '✓ התראות בנייד פעילות'; }
+  if (btn && text) { btn.classList.add('active'); text.textContent = '✓ התראות פעילות'; }
+  
+  if ('Notification' in window) {
+    Notification.requestPermission();
+  }
 }
 
 function sendSystemNotification(title, body) {
-  const options = {
-    body: body,
-    tag: 'task-alert',
-    renotify: true,
-    data: { note: body }
-  };
-  
+  // פתרון התראה מעוצב ישיר למובייל - עוקף את חסימות מערכת ההפעלה של הטלפון
+  const toast = document.getElementById('toastAlert');
+  const toastBody = document.getElementById('toastBody');
+  if(toast && toastBody) {
+    toastBody.textContent = title + " - " + body;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 6000);
+  }
+
+  // ניסיון שליחה במערכת הרגילה אם היא מאופשרת
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      const n = new Notification(title, options);
-      n.onclick = function(e) {
-        e.preventDefault(); window.focus();
-        alert(title + '\n\n' + (this.data?.note || ''));
-      };
-      return;
+      new Notification(title, { body: body });
     } catch(e) {}
   }
-  
-  // פתרון מובייל אלטרנטיבי ישיר במידה והדפדפן חוסם חלונות צפים
-  alert('🔔 ' + title + '\n\n' + body);
 }
 
 function triggerImmediateTestNotification() {
-  sendSystemNotification('📱 בדיקת התראות משימות', 'התראות בנייד עובדות מעולה! בלחיצה כאן תראי את פרטי המשימה המלאים.');
+  sendSystemNotification('בדיקת מערכת', 'ההתראות שלך בטלפון עובדות עכשיו מעולה! 🎉');
 }
 
 function checkAlarmClock() {
@@ -386,32 +359,44 @@ function checkAlarmClock() {
   const currentDayIndex = now.getDay(); 
   const todayKey = getTodayKey();
   const timeKey = currentHour + ':' + String(currentMinute).padStart(2, '0');
+  
+  let storageCache = '';
+  try { storageCache = localStorage.getItem('last_triggered_alarm') || ''; } catch(e){}
   const cacheKey = todayKey + '_' + timeKey + '_' + now.getDate();
-
-  if (localStorage.getItem('last_triggered_alarm') === cacheKey) return;
+  if (storageCache === cacheKey) return;
 
   if (currentDayIndex === 6) {
     if (timeKey === '09:00') {
       sendSystemNotification('יצירת לו"ז וחוויות שבועי', 'זמן לעבור על הדוח השבועי ותכנון המטרות בכיף ✨');
-      localStorage.setItem('last_triggered_alarm', cacheKey);
+      try { localStorage.setItem('last_triggered_alarm', cacheKey); }catch(e){}
       openModal('saturdayReport');
-    }
-    else if (timeKey === '16:30') {
-      sendSystemNotification('יצירת לו"ז וחוויות שבועי', 'תזכורת שנייה לשבת - בדיקה וסגירה של הלו"ז לשבוע הבא!');
-      localStorage.setItem('last_triggered_alarm', cacheKey);
     }
   } 
   else if (currentDayIndex >= 0 && currentDayIndex <= 4 && timeKey === '07:00') {
     const todayTasks = (schedule[todayKey] || []).map(getTask).filter(t => t && !t.done);
     if (todayTasks.length > 0) {
-      const first = todayTasks[0];
-      const details = first.note ? ' | פרטים: ' + first.note : ' אין פרטים נוספים';
-      sendSystemNotification('📌 בוקר טוב! משימה להיום: ' + first.title, 'עוד ' + todayTasks.length + ' משימות ממתינות לך.' + details);
-    } else {
-      sendSystemNotification('📅 תזכורת בוקר', 'הלו"ז היומי פנוי, היכנסי לשבץ משימות מהבנק!');
+      sendSystemNotification('📌 בוקר טוב!', 'יש לך ' + todayTasks.length + ' משימות שממתינות לך היום בלו"ז.');
     }
-    localStorage.setItem('last_triggered_alarm', cacheKey);
+    try { localStorage.setItem('last_triggered_alarm', cacheKey); }catch(e){}
   }
+}
+
+function getWeekDates() {
+  const now = new Date();
+  const currentDay = now.getDay();
+  const startOfWeek = new Date(now.getTime());
+  startOfWeek.setDate(now.getDate() - currentDay);
+
+  let dates = {};
+  DAYS.forEach(d => {
+    let target = new Date(startOfWeek.getTime());
+    target.setDate(startOfWeek.getDate() + d.index);
+    let day = String(target.getDate()).padStart(2, '0');
+    let month = String(target.getMonth() + 1).padStart(2, '0');
+    dates[d.key] = day + '/' + month;
+    dates[d.key+'_iso'] = target.getFullYear() + '-' + month + '-' + day;
+  });
+  return dates;
 }
 
 function renderWeek(){
@@ -427,7 +412,7 @@ function renderWeek(){
 
   const weekLabelEl = document.getElementById('weekLabel');
   if(weekLabelEl) {
-    weekLabelEl.textContent = totalFilled ? totalDone + ' מתוך ' + totalFilled + ' משימות שבועיות הושלמו' : 'הלו"ז ריק. לחצי לייצור אוטומטי או הוסיפי ידנית';
+    weekLabelEl.textContent = totalFilled ? totalDone + ' מתוך ' + totalFilled + ' משימות שבועיות הושלמו' : 'הלו"ז ריק. לחצי לייצור אוטומטי';
   }
    
   const headersEl = document.getElementById('dayHeaders');
@@ -446,7 +431,6 @@ function renderWeek(){
         if(!t) return;
         const c = getCat(t.cat);
         const isShort = t.duration === 'short';
-        const timeTagText = isShort ? '⚡ עד 5 דק\'' : '⏳ מעל 5 דק\'';
          
         cardsHtml += '<div class="sched-card ' + (t.done ? 'done' : '') + '" style="background:' + c.color + ';border-color:' + c.border + '">' +
             '<div style="display:flex;align-items:flex-start;gap:5px;">' +
@@ -457,7 +441,7 @@ function renderWeek(){
             '</div>' +
             '<div class="sched-meta">' +
               '<span style="font-size:9px;color:' + c.text + ';font-weight:700;">' + c.name + '</span>' +
-              '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '" style="font-size:8px;padding:0 4px;">' + timeTagText + '</span>' +
+              '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '" style="font-size:8px;padding:0 4px;">' + (isShort?'⚡ 5 דק\'':'⏳ ארך') + '</span>' +
             '</div>' +
             '<div class="sched-actions">' +
               '<button class="btn-icon" style="width:20px;height:20px;" onclick="openModal(\'edit\',\'' + t.id + '\')">' +
@@ -489,60 +473,33 @@ function removeFromDay(dayKey, taskId){
 function generateScheduleWithLevel(maxPerDay) {
   const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu'];
   const wDates = getWeekDates();
-   
   weekdayKeys.forEach(k => { schedule[k] = []; });
+  
   let freeTasks = tasks.filter(t => t && !t.done);
-
   freeTasks.forEach(t => {
     if (t.due) {
       DAYS.forEach(d => {
         if (t.due === wDates[d.key+'_iso']) {
-          if (!schedule[d.key].includes(t.id)) {
-            schedule[d.key].push(t.id);
-          }
+          if (!schedule[d.key].includes(t.id)) schedule[d.key].push(t.id);
         }
       });
     }
   });
 
-  let remainingFree = freeTasks.filter(t => {
-    return !Object.values(schedule).some(dayArr => dayArr.includes(t.id));
-  });
-
-  if(!remainingFree.length && !freeTasks.length) {
-    alert('אין משימות פנויות בבנק לשיבוץ אוטומטי! 📋');
-    closeModal(); return;
-  }
+  let remainingFree = freeTasks.filter(t => !Object.values(schedule).some(dayArr => dayArr.includes(t.id)));
+  if(!remainingFree.length) { alert('אין משימות פנויות בבנק לשיבוץ! 📋'); closeModal(); return; }
 
   let urgent = remainingFree.filter(t => t.prio === 'high');
   let nonUrgent = remainingFree.filter(t => t.prio !== 'high');
-   
   let shortTasks = nonUrgent.filter(t => t.duration === 'short');
   let longTasks = nonUrgent.filter(t => t.duration !== 'short');
 
   weekdayKeys.forEach(k => {
-    let currentCount = schedule[k].length;
-    let slotsAvailable = maxPerDay - currentCount;
-
-    while (slotsAvailable > 0 && urgent.length > 0) {
-      schedule[k].push(urgent.shift().id);
-      slotsAvailable--;
-    }
-
-    if (slotsAvailable >= 1 && shortTasks.length > 0) {
-      schedule[k].push(shortTasks.shift().id);
-      slotsAvailable--;
-    }
-
-    while (slotsAvailable > 0 && longTasks.length > 0) {
-      schedule[k].push(longTasks.shift().id);
-      slotsAvailable--;
-    }
-     
-    while (slotsAvailable > 0 && shortTasks.length > 0) {
-      schedule[k].push(shortTasks.shift().id);
-      slotsAvailable--;
-    }
+    let slotsAvailable = maxPerDay - schedule[k].length;
+    while (slotsAvailable > 0 && urgent.length > 0) { schedule[k].push(urgent.shift().id); slotsAvailable--; }
+    if (slotsAvailable >= 1 && shortTasks.length > 0) { schedule[k].push(shortTasks.shift().id); slotsAvailable--; }
+    while (slotsAvailable > 0 && longTasks.length > 0) { schedule[k].push(longTasks.shift().id); slotsAvailable--; }
+    while (slotsAvailable > 0 && shortTasks.length > 0) { schedule[k].push(shortTasks.shift().id); slotsAvailable--; }
   });
 
   save(); renderWeek(); closeModal();
@@ -557,8 +514,7 @@ function dropOnDay(e,k){
     if(!schedule[k]) schedule[k] = [];
     if(!schedule[k].includes(tId)) {
       DAYS.forEach(day => { schedule[day] = (schedule[day]||[]).filter(id => id !== tId); });
-      schedule[k].push(tId);
-      save(); renderWeek();
+      schedule[k].push(tId); save(); renderWeek();
     }
   }
 }
@@ -566,16 +522,12 @@ function dropOnDay(e,k){
 function renderPills(){
   const el=document.getElementById('catPills');
   if(!el) return;
-   
   let h='<span class="pill pill-all' + (filter==='all'?' active':'') + '" onclick="setFilter(\'all\')" style="background:#f3f4f6;color:#111827;">הכל</span>';
-   
   cats.forEach(c=>{ 
     const isActive = filter === c.id;
-    h += '<span class="pill" style="background:' + c.color + ';color:' + c.text + ';border-color:' + (isActive ? c.text : 'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' +
-         esc(c.name) + '</span>'; 
+    h += '<span class="pill" style="background:' + c.color + ';color:' + c.text + ';border-color:' + (isActive ? c.text : 'transparent') + '" onclick="setFilter(\'' + c.id + '\')">' + esc(c.name) + '</span>'; 
   });
-   
-  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'' + c.id + '\')" style="background:#e5e5e5;color:#4b5563;">✓ הושלם</span>';
+  h+='<span class="pill pill-done' + (filter==='done'?' active':'') + '" onclick="setFilter(\'done\')" style="background:#e5e5e5;color:#4b5563;">✓ הושלם</span>';
   el.innerHTML = h;
 }
 
@@ -586,14 +538,13 @@ function renderTasks(){
   list = [...list].sort((a,b)=> (a.prio==='high'?0:1) - (b.prio==='high'?0:1));
    
   if(!list.length){
-    el.innerHTML='<div class="task-empty"><div style="font-size:22px;opacity:.2;">✦</div><div>אין משימות להצגה</div></div>';
+    el.innerHTML='<div class="task-empty"><div style="font-size:22px;opacity:.2;">✦</div><div>אין משימות בקבוצה זו</div></div>';
     return;
   }
 
   el.innerHTML=list.map(t=>{
     const c=getCat(t.cat);
     const isShort = t.duration === 'short';
-    const timeTagText = isShort ? '⚡ עד 5 דקות' : '⏳ מעל 5 דקות';
     const dateStr = t.due ? t.due.split('-').reverse().join('/') : '';
      
     return '<div class="task-card fade-in ' + (t.done ? 'done' : '') + '" style="background:' + c.color + '; border-color:' + c.border + ';" ' +
@@ -606,7 +557,7 @@ function renderTasks(){
         (t.note ? '<div class="task-note" style="color:' + c.text + '; opacity:0.8;">' + esc(t.note) + '</div>' : '') +
         '<div class="task-meta">' +
           '<span class="cat-badge" style="color:' + c.text + ';border-color:' + c.text + '">' + c.name + '</span>' +
-          '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + timeTagText + '</span>' +
+          '<span class="duration-tag ' + (isShort ? 'dur-short' : 'dur-long') + '">' + (isShort?'⚡ 5 דקות':'⏳ מעל 5 דק\'') + '</span>' +
           (t.prio === 'high' ? '<span class="prio-tag prio-high">🔥 גבוהה</span>' : '') +
           (t.due ? '<span style="font-size:10px;color:' + c.text + '; opacity:0.8;">📅 ' + dateStr + '</span>' : '') +
         '</div>' +
@@ -625,7 +576,7 @@ function renderProgress(){
   const bar = document.getElementById('progressBar');
   if (bar) bar.style.width=(total?Math.round((done/total)*100):0)+'%';
   const label = document.getElementById('progressLabel');
-  if (label) label.textContent=total? done + ' מתוך ' + total + ' משימות בבנק הושלמו' : '';
+  if (label) label.textContent=total? done + ' מתוך ' + total + ' משימות בבנק הושלמו' : 'הבנק ריק';
 }
 
 function renderCatSidebar(){
@@ -649,7 +600,7 @@ function renderCatSidebar(){
 }
 
 function deleteCat(catId) {
-  if(confirm('האם את בטוחה שברצונך למחוק קטגוריה זו? המשימות המשויכות אליה לא יימחקו.')) {
+  if(confirm('האם למחוק קטגוריה זו? המשימות שלה לא יימחקו אלא יעברו ללא קטגוריה.')) {
     cats = cats.filter(c => c.id !== catId);
     save(); render(); closeModal();
   }
@@ -659,7 +610,7 @@ function selectColorInForm(colorCode) {
   selectedCatColor = colorCode;
   document.querySelectorAll('.color-opt-btn').forEach(btn => {
     btn.classList.remove('selected');
-    if(btn.getAttribute('data-color') === colorCode) { btn.classList.add('selected'); }
+    if(btn.getAttribute('data-color') === colorCode) btn.classList.add('selected');
   });
 }
 
@@ -690,14 +641,13 @@ function saveTaskForm() {
   const due = document.getElementById('formDue').value;
   const note = document.getElementById('formNote').value.trim();
 
-  if(!title) { alert('אנא הזן כותרת למשימה'); return; }
+  if(!title) { alert('אנא הזיני כותרת'); return; }
 
   if(editId) {
     const t = getTask(editId);
     if(t) { t.title = title; t.cat = cat; t.duration = duration; t.prio = prio; t.due = due; t.note = note; }
   } else {
-    const newId = uid();
-    tasks.push({ id: newId, title, cat, duration, prio, due, note, done: false });
+    tasks.push({ id: uid(), title, cat, duration, prio, due, note, done: false });
   }
   save(); render(); closeModal();
 }
@@ -713,17 +663,15 @@ function assignTaskFromBank(dayKey, taskId) {
 
 function saveCatForm() {
   const name = document.getElementById('catFormName').value.trim();
-  const color = selectedCatColor;
+  if(!name) { alert('אנא הזיני שם לקטגוריה'); return; }
 
-  if(!name) { alert('אנא הזן שם לקטגוריה'); return; }
-
-  const matched = CUSTOM_COLORS_PALETTE.find(d => d.color === color) || { text: '#111827', border: '#cbd5e1' };
+  const matched = CUSTOM_COLORS_PALETTE.find(d => d.color === selectedCatColor) || CUSTOM_COLORS_PALETTE[0];
 
   if(editCatId) {
     const c = cats.find(x => x.id === editCatId);
-    if(c) { c.name = name; c.color = color; c.text = matched.text; c.border = matched.border; }
+    if(c) { c.name = name; c.color = selectedCatColor; c.text = matched.text; c.border = matched.border; }
   } else {
-    cats.push({ id: 'cat_' + uid(), name, color, text: matched.text, border: matched.border });
+    cats.push({ id: 'cat_' + uid(), name, color: selectedCatColor, text: matched.text, border: matched.border });
   }
   save(); render(); closeModal();
 }
@@ -741,7 +689,7 @@ function openModal(type,id){
         '<div class="modal-title">' + (editId?'עריכת משימה':'משימה חדשה') + '</div>' +
         '<div class="form-group">' +
           '<label class="form-label">כותרת המשימה</label>' +
-          '<input type="text" id="formTitle" class="form-input" value="' + (t?esc(t.title):'') + '" placeholder="מה צריך לעשות?">' +
+          '<input type="text" id="formTitle" class="form-input" value="' + (t?esc(t.title):'') + '">' +
         '</div>' +
         '<div class="form-row">' +
           '<div class="form-group" style="flex:1;">' +
@@ -764,16 +712,16 @@ function openModal(type,id){
           '</select>' +
         '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">תאריך יעד ספציפי (אופציונלי)</label>' +
+          '<label class="form-label">תאריך יעד ספציפי</label>' +
           '<input type="date" id="formDue" class="form-input" value="' + (t&&t.due?t.due:'') + '">' +
         '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">הערות / פרטים נוספים</label>' +
-          '<textarea id="formNote" class="form-input form-textarea" placeholder="פירוט חופשי...">' + (t?esc(t.note):'') + '</textarea>' +
+          '<label class="form-label">הערות</label>' +
+          '<textarea id="formNote" class="form-input form-textarea">' + (t?esc(t.note):'') + '</textarea>' +
         '</div>' +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          '<button class="btn-primary" onclick="saveTaskForm()">שמור משימה</button>' +
+          '<button class="btn-primary" onclick="saveTaskForm()">שמור</button>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -785,14 +733,14 @@ function openModal(type,id){
 
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in">' +
-        '<div class="modal-title">הוספת משימה ליום ' + (DAYS.find(d=>d.key===id)?.full || '') + '</div>' +
+        '<div class="modal-title">הוספה ליום ' + (DAYS.find(d=>d.key===id)?.full || '') + '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">בחרי משימה מתוך הבנק</label>' +
+          '<label class="form-label">בחרי מהבנק</label>' +
           '<select id="bankTaskSelect" class="form-input">' + bankOpts + '</select>' +
         '</div>' +
         '<div class="modal-actions">' +
           '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
-          '<button class="btn-primary" onclick="if(document.getElementById(\'bankTaskSelect\').value) assignTaskFromBank(\'' + id + '\', document.getElementById(\'bankTaskSelect\').value)">הוסף ללו"ז</button>' +
+          '<button class="btn-primary" onclick="if(document.getElementById(\'bankTaskSelect\').value) assignTaskFromBank(\'' + id + '\', document.getElementById(\'bankTaskSelect\').value)">הוסף</button>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -801,17 +749,17 @@ function openModal(type,id){
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in" style="max-width:360px;">' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(1)">' +
-          '<div class="opt-title">בסיסי- משימה אחת ביום</div>' +
+          '<div class="opt-title">בסיסי - משימה אחת ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(3)">' +
           '<div class="opt-title">מתקדם - עד 3 משימות ביום</div>' +
         '</div>' +
         '<div class="opt-box" onclick="generateScheduleWithLevel(5)">' +
-          '<div class="opt-title">שגרה מלאה- עד 5 משימות ביום</div>' +
+          '<div class="opt-title">שגרה מלאה - עד 5 משימות ביום</div>' +
         '</div>' +
         '<div class="modal-actions" style="margin-top:12px;">' +
           '<button class="btn-ghost" onclick="closeModal()">סגור</button>' +
-        '</div>' +
+        </div>' +
       '</div>' +
     '</div>';
   }
@@ -826,18 +774,20 @@ function openModal(type,id){
 
     mc.innerHTML = '<div class="modal-overlay">' +
       '<div class="modal fade-in">' +
-        '<div class="modal-title">' + (editCatId?'עריכת קטגוריה':'הוספת קטגוריה חדשה') + '</div>' +
+        '<div class="modal-title">' + (editCatId ? 'עריכת קטגוריה קיימת' : 'יצירת קטגוריה חדשה') + '</div>' +
         '<div class="form-group">' +
           '<label class="form-label">שם הקטגוריה</label>' +
-          '<input type="text" id="catFormName" class="form-input" value="' + (c?esc(c.name):'') + '" placeholder="לדוגמה: סידורים, פנאי, לימודים...">' +
+          '<input type="text" id="catFormName" class="form-input" value="' + (c?esc(c.name):'') + '" placeholder="הזיני שם..."> ' +
         '</div>' +
         '<div class="form-group">' +
-          '<label class="form-label">בחרי צבע ייחודי לקטגוריה החדשה:</label>' +
+          '<label class="form-label">בחרי צבע עיצוב:</label>' +
           '<div class="color-grid-picker">' + colorPickersHtml + '</div>' +
         '</div>' +
-        '<div class="modal-actions" style="justify-content: ' + (editCatId?'space-between':'flex-end') + ';">' +
-          (editCatId?'<button class="btn-ghost" style="color:#dc2626;border-color:#fee2e2;" onclick="deleteCat(\''+c.id+'\')">מחק קטגוריה</button>':'') +
-          '<div style="display:flex;gap:8px;">' +
+        '<div class="modal-actions" style="justify-content:space-between; width:100%;">' +
+          '<div>' + 
+            (editCatId ? '<button class="btn-ghost" style="color:#dc2626; border-color:#fee2e2; background:#fff5f5;" onclick="deleteCat(\''+c.id+'\')">🗑️ מחק קטגוריה</button>' : '') +
+          '</div>' +
+          '<div style="display:flex; gap:8px;">' +
             '<button class="btn-ghost" onclick="closeModal()">ביטול</button>' +
             '<button class="btn-primary" onclick="saveCatForm()">שמור קטגוריה</button>' +
           '</div>' +
@@ -845,36 +795,12 @@ function openModal(type,id){
       '</div>' +
     '</div>';
   }
-  else if(type==='saturdayReport') {
-    const validTasks = tasks.filter(Boolean);
-    const completedThisWeek = validTasks.filter(t => t.done).length;
-    
-    let badgingHtml = '';
-    if(completedThisWeek >= 10) badgingHtml = '🏆 אלופה! שבוע סופר פרודוקטיבי עם הספק מטורף.';
-    else if(completedThisWeek >= 5) badgingHtml = '🌟 עבודה מעולה! הגעת להישגים יפים השבוע.';
-    else badgingHtml = '🌱 צעד אחר צעד, שבוע הבא נגביר קצב בכיף ובנחת.';
-
-    mc.innerHTML = '<div class="modal-overlay">' +
-      '<div class="modal fade-in" style="max-width:440px; text-align:center;">' +
-        '<div style="font-size:40px;margin-bottom:10px;">✨</div>' +
-        '<div class="modal-title" style="text-align:center;font-size:20px;margin-bottom:6px;">דוח סיכום וחוויות לשבת</div>' +
-        '<div style="font-size:14px;color:#4b5563;margin-bottom:20px;">זמן לעצור, לנשום ולהסתכל בגאווה על השבוע שלך.</div>' +
-        '<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #e5e7eb;">' +
-          '<div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;">משימות שהושלמו השבוע:</div>' +
-          '<div style="font-size:28px;font-weight:800;color:#7c3aed;">' + completedThisWeek + '</div>' +
-          '<div style="font-size:13px;color:#6b7280;margin-top:6px;font-weight:500;">' + badgingHtml + '</div>' +
-        '</div>' +
-        '<div style="font-size:13px;color:#9ca3af;line-height:1.5;margin-bottom:20px;">"אנחנו לא בהשוואה — אנחנו בהשראה"<br>נוחי בשבת, מלאי מצברים, ונתראה בשבוע הבא! 🧘‍♀️</div>' +
-        '<button class="btn-primary" style="width:100%;justify-content:center;padding:10px;" onclick="closeModal()">סגור וסנכרן אנרגיה ✨</button>' +
-      '</div>' +
-    '</div>';
-  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  loadStorageSafely();
   render();
-  updateNotiButtonUI();
-  setInterval(checkAlarmClock, 20000);
+  setInterval(checkAlarmClock, 15000);
 });
 </script>
 </body>
